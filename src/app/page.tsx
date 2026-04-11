@@ -1,4 +1,4 @@
-import { proyectos } from "../../../../../data/projects"
+import { proyectos } from "./data/projects"
 
 const proceso = [
   {
@@ -22,9 +22,6 @@ const proceso = [
     desc: "Del concepto a la entrega. Un estudio, de principio a fin.",
   },
 ];
-
-
-
 
 export default function Home() {
   return (
@@ -96,8 +93,7 @@ export default function Home() {
             >
               {[
                 { label: "Proyectos", href: "#work" },
-                { label: "Estudio", href: "#estudio" },
-                { label: "Proceso", href: "#proceso" },
+                { label: "Diseños", href: "#estudio" },
                 { label: "Contacto", href: "#contact" },
               ].map((item) => (
                 <a
@@ -130,6 +126,7 @@ export default function Home() {
               Contacto
             </a>
           </header>
+
           {/* Imagen de fondo */}
           <img
             src="/images/hero.jpg"
@@ -166,7 +163,7 @@ export default function Home() {
 
         {/* ─── Introducción ───────────────────────────────────────── */}
         <section className="pt-10 pb-28" aria-label="Introducción">
-          <div className="max-w-5xl mx-auto px-6">
+          <div className="max-w-6xl px-8 md:px-16">
 
             {/* Bloque superior: título + párrafo */}
             <div className="max-w-3xl">
@@ -192,10 +189,10 @@ export default function Home() {
             </div>
 
             {/* Bloque inferior: imágenes lado a lado + texto */}
-            <div className="mt-20 grid grid-cols-1 md:grid-cols-[720px_1fr] gap-16 items-start">
+            <div className="mt-20 grid grid-cols-1 md:grid-cols-[760px_320px] gap-10 items-center">
 
               {/* Columna izquierda: subgrid 2 imágenes */}
-              <div className="w-full max-w-[720px]">
+              <div className="w-full max-w-[760px] justify-self-start">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                   <div className="w-full">
                     <img
@@ -204,9 +201,9 @@ export default function Home() {
                       className="block w-full aspect-[4/5] object-cover"
                     />
                   </div>
-                  <div className="w-full md:pt-10">
+                  <div className="w-full">
                     <img
-                      src="/images/baño.jpg"
+                      src="/images/Baño.jpg"
                       alt="Baño CĀLIZA"
                       className="block w-full aspect-[4/5] object-cover"
                     />
@@ -216,7 +213,7 @@ export default function Home() {
 
               {/* Columna derecha: texto centrado verticalmente */}
               <div className="flex items-center h-full">
-                <div className="max-w-sm">
+                <div className="max-w-[380px]">
                   <h3
                     className="font-serif font-light leading-[1.1] tracking-[-0.01em] mb-4"
                     style={{
@@ -263,37 +260,37 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col" style={{ gap: "7rem" }}>
-              {proyectos.map((p) => ( 
+              {proyectos.map((p) => (
                 <article key={p.nombre} className="group" style={{ cursor: "default" }}>
-                <div className="w-full overflow-hidden" style={{ aspectRatio: p.proporcion || "16/9" }}>
-                  <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover" />
-                </div>
+                  <div className="w-full overflow-hidden" style={{ aspectRatio: p.proporcion || "16/9" }}>
+                    <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover" />
+                  </div>
 
-                <h2
-                  className="mt-4 font-serif"
-                  style={{
-                    fontSize: "clamp(1.25rem, 2vw, 1.75rem)",
-                    color: "var(--texto-principal)",
-                    letterSpacing: "-0.01em",
-                    fontWeight: 400,
-                  }}
-                >
-                  {p.nombre}
-                </h2>
-
-                {p.categoria && (
-                  <p
-                    className="mt-1 font-light"
+                  <h2
+                    className="mt-4 font-serif"
                     style={{
-                      fontSize: "0.8125rem",
-                      color: "var(--texto-tenue)",
-                      letterSpacing: "0.02em",
+                      fontSize: "clamp(1.25rem, 2vw, 1.75rem)",
+                      color: "var(--texto-principal)",
+                      letterSpacing: "-0.01em",
+                      fontWeight: 400,
                     }}
                   >
-                    {p.categoria}
-                  </p>
-                )}
-              </article>
+                    {p.nombre}
+                  </h2>
+
+                  {p.categoria && (
+                    <p
+                      className="mt-1 font-light"
+                      style={{
+                        fontSize: "0.8125rem",
+                        color: "var(--texto-tenue)",
+                        letterSpacing: "0.02em",
+                      }}
+                    >
+                      {p.categoria}
+                    </p>
+                  )}
+                </article>
               ))}
             </div>
           </div>
@@ -364,7 +361,9 @@ export default function Home() {
                     color: "var(--texto-principal)",
                   }}
                 >
-                  PROYECTOS CONCEBIDOS CON VISIÓN Y DISEÑO.
+                  No separamos diseño de ejecución. Cada proyecto pasa por una
+                  misma mano — desde el primer estudio de material hasta la
+                  última visita de obra. No hay modelo de traspaso.
                 </p>
                 <p
                   className="mt-8 font-light leading-[1.8]"
@@ -510,7 +509,7 @@ export default function Home() {
 
             <div className="mt-16 flex flex-col" style={{ gap: "0.6rem" }}>
               <a
-                href="mailto:estudio@calizastudio.mx"
+                href="mailto:info@calizastudio.com.mx"
                 className="font-light transition-opacity hover:opacity-60"
                 style={{
                   fontSize: "0.9375rem",
@@ -518,10 +517,10 @@ export default function Home() {
                   letterSpacing: "0.02em",
                 }}
               >
-                estudio@calizastudio.mx
+                info@calizastudio.com.mx
               </a>
               <a
-                href="tel:+529990000000"
+                href="tel:+525576681763"
                 className="font-light transition-opacity hover:opacity-60"
                 style={{
                   fontSize: "0.9375rem",
@@ -529,7 +528,7 @@ export default function Home() {
                   letterSpacing: "0.02em",
                 }}
               >
-                +52 557 668 1763
+                +52 5576681763
               </a>
               <p
                 className="font-light"
@@ -546,6 +545,232 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      {/* ─── Cierre editorial / Newsletter ─────────────────────── */}
+      <section className="w-full" aria-label="Novedades">
+
+        {/* Bloque superior: imagen + formulario */}
+        <div
+          className="relative overflow-hidden"
+          style={{
+            border: "1px solid var(--acento)",
+            borderRadius: "6px",
+          }}
+        >
+          {/* Imagen de fondo */}
+          <img
+            src="/images/fondo.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          {/* Overlay muy sutil */}
+          <div
+            className="absolute inset-0"
+            style={{ background: "rgba(43,31,24,0.52)" }}
+            aria-hidden="true"
+          />
+
+          {/* Contenido */}
+          <div
+            className="relative px-10 md:px-16 py-20 md:py-28"
+            style={{ zIndex: 2 }}
+          >
+            <p
+              className="mb-3 font-light"
+              style={{
+                fontSize: "0.6875rem",
+                color: "rgba(255,255,255,0.55)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                fontFamily: "var(--font-jost), sans-serif",
+              }}
+            >
+              Novedades
+            </p>
+            <h2
+              className="font-serif font-light leading-[1.1] mb-3"
+              style={{
+                fontSize: "clamp(1.75rem, 3.5vw, 3rem)",
+                color: "#fff",
+                maxWidth: "520px",
+              }}
+            >
+              Suscríbete para recibir novedades, proyectos y lanzamientos de CĀLIZA.
+            </h2>
+
+            {/* Formulario */}
+            <form
+              className="mt-10 flex flex-col sm:flex-row gap-3"
+              style={{ maxWidth: "480px" }}
+              action="#"
+            >
+              <input
+                type="email"
+                placeholder="Tu correo electrónico"
+                required
+                className="flex-1 bg-transparent font-light outline-none"
+                style={{
+                  borderBottom: "1px solid var(--acento)",
+                  padding: "0.625rem 0",
+                  fontSize: "0.875rem",
+                  color: "#fff",
+                  letterSpacing: "0.02em",
+                  fontFamily: "var(--font-jost), sans-serif",
+                }}
+              />
+              <button
+                type="submit"
+                className="font-light transition-opacity hover:opacity-70 whitespace-nowrap"
+                style={{
+                  border: "1px solid var(--acento)",
+                  borderRadius: "3px",
+                  padding: "0.625rem 1.5rem",
+                  fontSize: "0.8125rem",
+                  color: "#fff",
+                  letterSpacing: "0.08em",
+                  fontFamily: "var(--font-jost), sans-serif",
+                  background: "transparent",
+                  cursor: "pointer",
+                }}
+              >
+                Enviar
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Bloque inferior: cierre sobrio */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 px-10 md:px-16 py-16 md:py-20 mt-px"
+          style={{
+            background: "var(--texto-principal)",
+            borderRadius: "0 0 6px 6px",
+          }}
+        >
+          {/* Col 1: marca */}
+          <div>
+            <p
+              className="font-serif font-light mb-3"
+              style={{
+                fontSize: "1rem",
+                letterSpacing: "0.15em",
+                color: "#fff",
+              }}
+            >
+              CĀLIZA
+            </p>
+            <p
+              className="font-light leading-[1.7]"
+              style={{
+                fontSize: "0.8125rem",
+                color: "rgba(255,255,255,0.45)",
+                letterSpacing: "0.02em",
+                maxWidth: "220px",
+              }}
+            >
+              Diseño arquitectónico y fabricación con intención.
+            </p>
+          </div>
+
+          {/* Col 2: contacto */}
+          <div>
+            <p
+              className="font-light mb-4"
+              style={{
+                fontSize: "0.6875rem",
+                color: "rgba(255,255,255,0.35)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              Contacto
+            </p>
+            <div className="flex flex-col gap-2">
+              <a
+                href="mailto:info@calizastudio.com.mx"
+                className="font-light transition-opacity hover:opacity-60"
+                style={{
+                  fontSize: "0.8125rem",
+                  color: "rgba(255,255,255,0.6)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                info@calizastudio.com.mx
+              </a>
+              <a
+                href="tel:+525576681763"
+                className="font-light transition-opacity hover:opacity-60"
+                style={{
+                  fontSize: "0.8125rem",
+                  color: "rgba(255,255,255,0.6)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                +52 5576681763
+              </a>
+            </div>
+          </div>
+
+          {/* Col 3: navegación */}
+          <div>
+            <p
+              className="font-light mb-4"
+              style={{
+                fontSize: "0.6875rem",
+                color: "rgba(255,255,255,0.35)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              Menú
+            </p>
+            <div className="flex flex-col gap-2">
+              {[
+                { label: "Inicio", href: "#" },
+                { label: "Diseños", href: "#estudio" },
+                { label: "Proyectos", href: "#work" },
+                { label: "Contacto", href: "#contact" },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="font-light transition-opacity hover:opacity-60"
+                  style={{
+                    fontSize: "0.8125rem",
+                    color: "rgba(255,255,255,0.6)",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      {/* ─── WhatsApp flotante ──────────────────────────────────── */}
+      <a
+        href="https://wa.me/525576681763?text=%C2%A1Hola!%20Me%20gustar%C3%ADa%20cotizar%20un%20proyecto/producto%20de%20dise%C3%B1o%20C%C4%80LIZA"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contactar por WhatsApp"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#25D366] shadow-sm transition-transform duration-200 hover:scale-105"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          className="w-6 h-6"
+          fill="currentColor"
+        >
+          <path
+            fill="white"
+            d="M20.52 3.48A11.8 11.8 0 0 0 12.02 0C5.38 0 .02 5.36.02 12c0 2.12.55 4.19 1.6 6.02L0 24l6.14-1.6A11.96 11.96 0 0 0 12.02 24c6.64 0 12-5.36 12-12 0-3.2-1.25-6.22-3.5-8.52ZM12.02 21.8c-1.84 0-3.65-.5-5.23-1.46l-.37-.22-3.65.95.98-3.56-.24-.37a9.77 9.77 0 0 1-1.5-5.14c0-5.41 4.4-9.8 9.8-9.8 2.62 0 5.09 1.02 6.94 2.87a9.74 9.74 0 0 1 2.87 6.93c0 5.41-4.4 9.8-9.8 9.8Zm5.37-7.35c-.29-.15-1.7-.84-1.97-.94-.27-.1-.47-.15-.67.15-.2.29-.77.94-.94 1.14-.17.2-.34.22-.63.07-.29-.15-1.21-.45-2.3-1.44-.85-.76-1.43-1.7-1.6-1.98-.17-.29-.02-.44.13-.59.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.2.05-.37-.02-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.29-1.04 1.01-1.04 2.46s1.07 2.85 1.22 3.05c.15.2 2.1 3.2 5.08 4.48.71.31 1.27.5 1.7.64.71.23 1.36.2 1.87.12.57-.08 1.7-.7 1.94-1.38.24-.68.24-1.26.17-1.38-.07-.12-.27-.2-.56-.34Z"
+          />
+        </svg>
+      </a>
 
       {/* ─── Footer ─────────────────────────────────────────────── */}
       <footer
