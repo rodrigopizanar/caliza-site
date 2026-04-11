@@ -74,8 +74,57 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Columna derecha: logo arranca al mismo nivel que el título */}
-              <EditorialLogoBlock />
+              {/* Columna derecha: pestaña editorial + logo */}
+              {/* -mr-8 md:-mr-16 rompe el padding del contenedor para llegar al borde derecho */}
+              <div className="relative overflow-hidden -mr-8 md:-mr-16">
+
+                <style>{`
+                  @keyframes slideFromRight {
+                    0%   { transform: translateX(160%); opacity: 0; }
+                    100% { transform: translateX(0);    opacity: 1; }
+                  }
+                  .tab-editorial {
+                    animation: slideFromRight 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s both;
+                  }
+                  .tab-conocenos              { background: var(--fondo); }
+                  .tab-conocenos:hover        { background: rgba(110,115,102,0.28); color: var(--fondo); border-color: rgba(110,115,102,0.7); }
+                  .tab-conocenos:active       { background: rgba(110,115,102,0.40); color: var(--fondo); }
+                  .tab-conocenos:focus-visible { outline: none; box-shadow: 0 0 0 1.5px #6E7366; }
+                `}</style>
+
+                {/* Pestaña: líneas full-width desde borde derecho, botón a la izquierda */}
+                <div
+                  className="tab-editorial"
+                  style={{ display: "flex", flexDirection: "column", gap: "0.875rem", padding: "1.5rem 0" }}
+                >
+                  {/* Línea superior — llega al borde derecho */}
+                  <div style={{ height: "1px", background: "#6E7366", opacity: 0.55 }} />
+                  {/* Botón alineado a la izquierda del bloque */}
+                  <div style={{ alignSelf: "flex-start", paddingLeft: "0.25rem" }}>
+                    <Link
+                      href="/estudio"
+                      className="tab-conocenos inline-flex items-center justify-center rounded-full font-light transition-all duration-300 ease-out"
+                      style={{
+                        border: "1px solid rgba(110,115,102,0.55)",
+                        padding: "0.65rem 1.625rem",
+                        fontSize: "0.875rem",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "var(--texto-principal)",
+                        fontFamily: "var(--font-geist), sans-serif",
+                      }}
+                    >
+                      Conócenos
+                    </Link>
+                  </div>
+                  {/* Línea inferior — llega al borde derecho */}
+                  <div style={{ height: "1px", background: "#6E7366", opacity: 0.55 }} />
+                </div>
+
+                <div style={{ marginTop: "-7rem" }}>
+                  <EditorialLogoBlock />
+                </div>
+              </div>
 
             </div>
           </div>
