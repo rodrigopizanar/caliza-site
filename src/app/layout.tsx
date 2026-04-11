@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Jost } from "next/font/google";
+import { Cormorant_Garamond, Jost, Geist } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -12,6 +12,13 @@ const cormorant = Cormorant_Garamond({
 
 const jost = Jost({
   variable: "--font-jost",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  display: "swap",
+});
+
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   weight: ["300", "400", "500"],
   display: "swap",
@@ -34,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${jost.variable} h-full`}
+      className={`${cormorant.variable} ${jost.variable} ${geist.variable}`}
     >
       <body className="min-h-full">{children}</body>
     </html>

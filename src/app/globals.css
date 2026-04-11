@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --bg:       #F4EFE8;
-  --surface:  #EDE6DC;
-  --ink:      #1A1714;
-  --muted:    #8A7B6F;
-  --accent:   #C5A882;
-  --line:     #D5C9BB;
-  --white:    #FDFAF6;
+  /* ── Paleta CALIZA ── */
+  --fondo:            #E8E5DF;   /* piedra clara — fondo base */
+  --superficie:       #D4CABC;   /* arena mineral — placeholders, hover */
+  --linea:            #BFB5A8;   /* taupe estructural — divisores */
+  --texto-principal:  #2B1F18;   /* cacao profundo — titulares, cuerpo */
+  --texto-secundario: #50311D;   /* cacao estructural — apoyo, links */
+  --texto-tenue:      #8A7B6F;   /* metadata, fechas, créditos */
+  --acento:           #6E7366;   /* verde mineral — firma única */
 }
 
 @theme inline {
-  --color-bg:      var(--bg);
-  --color-surface: var(--surface);
-  --color-ink:     var(--ink);
-  --color-muted:   var(--muted);
-  --color-accent:  var(--accent);
-  --color-line:    var(--line);
-  --font-serif:    var(--font-cormorant);
-  --font-sans:     var(--font-jost);
+  --color-fondo:             var(--fondo);
+  --color-superficie:        var(--superficie);
+  --color-linea:             var(--linea);
+  --color-texto-principal:   var(--texto-principal);
+  --color-texto-secundario:  var(--texto-secundario);
+  --color-texto-tenue:       var(--texto-tenue);
+  --color-acento:            var(--acento);
+  --font-serif:              var(--font-cormorant);
+  --font-sans:               var(--font-jost);
 }
 
 html {
@@ -26,8 +28,8 @@ html {
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--ink);
+  background-color: var(--fondo);
+  color: var(--texto-principal);
   font-family: var(--font-jost), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -55,22 +57,22 @@ body::before {
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--linea);
   padding: 0.75rem 0;
   font-family: var(--font-jost), sans-serif;
   font-size: 0.875rem;
   letter-spacing: 0.02em;
-  color: var(--ink);
+  color: var(--texto-principal);
   outline: none;
   transition: border-color 0.2s ease;
 }
 
 .field::placeholder {
-  color: var(--muted);
+  color: var(--texto-tenue);
 }
 
 .field:focus {
-  border-bottom-color: var(--ink);
+  border-bottom-color: var(--texto-principal);
 }
 
 textarea.field {
@@ -81,10 +83,10 @@ textarea.field {
 /* Section label style */
 .label {
   font-family: var(--font-jost), sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--texto-tenue);
 }
 
 @media (prefers-reduced-motion: reduce) {
