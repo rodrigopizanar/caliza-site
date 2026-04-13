@@ -14,7 +14,11 @@ export default function PrivacidadPage() {
       <SiteHeader mode="page" />
 
       <main>
-        <section className="px-8 md:px-16 pt-20 pb-40" style={{ maxWidth: "680px" }}>
+        <section
+          className="px-8 md:px-16"
+          style={{ paddingTop: "5rem", paddingBottom: "8rem", maxWidth: "720px" }}
+        >
+          {/* Eyebrow */}
           <p
             style={{
               fontFamily: "var(--font-geist), sans-serif",
@@ -23,16 +27,17 @@ export default function PrivacidadPage() {
               textTransform: "uppercase",
               color: "var(--texto-tenue)",
               fontWeight: 300,
-              marginBottom: "1rem",
+              marginBottom: "1.5rem",
             }}
           >
             Legal
           </p>
 
+          {/* Título */}
           <h1
             className="font-serif font-light"
             style={{
-              fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+              fontSize: "clamp(2rem, 3.5vw, 2.75rem)",
               color: "var(--texto-principal)",
               letterSpacing: "-0.015em",
               lineHeight: 1.05,
@@ -42,39 +47,55 @@ export default function PrivacidadPage() {
             Política de privacidad
           </h1>
 
+          {/* Nota temporal */}
           <div
-            className="font-light leading-[1.85]"
             style={{
-              fontSize: "0.9375rem",
-              color: "var(--texto-secundario)",
-              letterSpacing: "0.02em",
-              display: "flex",
-              flexDirection: "column",
-              gap: "1.5rem",
+              paddingTop: "2.5rem",
+              paddingBottom: "2.5rem",
+              borderTop: "1px solid var(--linea)",
+              borderBottom: "1px solid var(--linea)",
             }}
           >
-            <p>
-              CĀLIZA Studio respeta la privacidad de quienes visitan este sitio. No recopilamos datos personales sin consentimiento explícito del usuario.
+            <p
+              style={{
+                fontFamily: "var(--font-geist), sans-serif",
+                fontSize: "0.9375rem",
+                color: "var(--texto-tenue)",
+                letterSpacing: "0.02em",
+                fontWeight: 300,
+                lineHeight: 1.85,
+              }}
+            >
+              Esta política será publicada próximamente.
             </p>
-            <p>
-              Los datos que puedas proporcionar a través del formulario de contacto o newsletter son utilizados exclusivamente para responder a tu solicitud o mantenerte informado sobre novedades de CĀLIZA. No compartimos esta información con terceros.
-            </p>
-            <p>
-              Este sitio puede utilizar cookies de análisis para mejorar la experiencia de navegación. Puedes desactivarlas desde la configuración de tu navegador en cualquier momento.
-            </p>
-            <p>
-              Para ejercer tu derecho de acceso, rectificación o eliminación de datos, escríbenos a{" "}
+            <p
+              style={{
+                fontFamily: "var(--font-geist), sans-serif",
+                fontSize: "0.9375rem",
+                color: "var(--texto-tenue)",
+                letterSpacing: "0.02em",
+                fontWeight: 300,
+                lineHeight: 1.85,
+                marginTop: "0.75rem",
+              }}
+            >
+              Para cualquier consulta relacionada con el tratamiento de tus datos,
+              escríbenos a{" "}
               <a
-                href="mailto:info@calizastudio.com.mx"
-                style={{ color: "var(--texto-principal)", textDecoration: "none" }}
+                href="mailto:info@caliza.studio"
+                style={{
+                  color: "var(--texto-secundario)",
+                  textDecoration: "none",
+                }}
               >
-                info@calizastudio.com.mx
+                info@caliza.studio
               </a>
               .
             </p>
           </div>
 
-          <div style={{ marginTop: "4rem", paddingTop: "2rem", borderTop: "1px solid var(--linea)" }}>
+          {/* Volver */}
+          <div style={{ marginTop: "5rem", paddingTop: "2rem", borderTop: "1px solid var(--linea)" }}>
             <Link
               href="/"
               style={{

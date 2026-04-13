@@ -491,7 +491,7 @@ export default function Home() {
                 {[
                   { label: "Inicio", href: "/" },
                   { label: "Proyectos", href: "/proyectos" },
-                  { label: "Diseños", href: "/estudio" },
+                  { label: "Productos", href: "/estudio" },
                   { label: "Proceso", href: "/proceso" },
                   { label: "Contacto", href: "/contacto" },
                 ].map((item) => (

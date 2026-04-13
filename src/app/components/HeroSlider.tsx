@@ -5,14 +5,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const slides = [
   { src: "/videos/video-hero08.mp4",  label: "R. DARÍO" },
   { src: "/videos/video-hero04.mp4",  label: "AVÁNDARO" },
-  { src: "/videos/video-hero010.mp4", label: "TEMOZÓN" },
-  { src: "/videos/video-hero011.mp4", label: "TELCHAC PUERTO" },
+  { src: "/videos/video-hero012.mp4", label: "TELCHAC PUERTO" },
+  { src: "/videos/video-hero011.mp4", label: "TEMOZÓN" },
 ];
 
-const COUNT         = slides.length;
-const INTERVAL_MS   = 8000;
-const LABEL_IN_MS   = 1600;
-const LABEL_OUT_MS  = 6400;
+const COUNT        = slides.length;
+const INTERVAL_MS  = 8000;
+const CROSSFADE_MS = 900;
+const LABEL_IN_MS  = 1600;
+const LABEL_OUT_MS = 6400;
 
 function armAndPlay(video: HTMLVideoElement) {
   video.muted            = true;
@@ -33,16 +34,28 @@ function armAndPlay(video: HTMLVideoElement) {
   if (p !== undefined) p.catch(() => {});
 }
 
-export default function HeroSlider() {
-  const [mounted,   setMounted]   = useState(false);
-  const [current,   setCurrent]   = useState(0);
-  const [covered,   setCovered]   = useState(true);
-  const [showLabel, setShowLabel] = useState(false);
+function getObjectPos(src: string) {
+  if (src === "/videos/video-hero04.mp4") return "55% center";
+  return "50% center";
+}
 
-  const videoRef    = useRef<HTMLVideoElement | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const currentRef  = useRef(0);
-  const labelTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+export default function HeroSlider() {
+  const [mounted,     setMounted]     = useState(false);
+  const [current,     setCurrent]     = useState(0);
+  const [covered,     setCovered]     = useState(true);   // solo carga inicial
+  const [showLabel,   setShowLabel]   = useState(false);
+  const [opacityA,    setOpacityA]    = useState(0);
+  const [opacityB,    setOpacityB]    = useState(0);
+  const [activeLayer, setActiveLayer] = useState<"A" | "B">("A");
+  const [objectPosA,  setObjectPosA]  = useState(getObjectPos(slides[0].src));
+  const [objectPosB,  setObjectPosB]  = useState("50% center");
+
+  const videoARef      = useRef<HTMLVideoElement | null>(null);
+  const videoBRef      = useRef<HTMLVideoElement | null>(null);
+  const intervalRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentRef     = useRef(0);
+  const activeLayerRef = useRef<"A" | "B">("A");
+  const labelTimers    = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearLabelTimers = () => {
     labelTimers.current.forEach(clearTimeout);
@@ -60,47 +73,75 @@ export default function HeroSlider() {
   // ── Solo en cliente ─────────────────────────────────────────────
   useEffect(() => { setMounted(true); }, []);
 
-  // ── Primer slide ────────────────────────────────────────────────
+  // ── Primer slide en Layer A ─────────────────────────────────────
   useEffect(() => {
-    if (!mounted || !videoRef.current) return;
-    const v = videoRef.current;
+    if (!mounted || !videoARef.current) return;
+    const v = videoARef.current;
+    v.src = slides[0].src;
 
-    const reveal = () => { setCovered(false); scheduleLabel(); };
+    const reveal = () => {
+      setOpacityA(1);
+      setCovered(false);
+      scheduleLabel();
+    };
     v.addEventListener("playing", reveal, { once: true });
 
-    // Reintento para Safari/iPhone (cold start)
+    // Reintento Safari cold start
     const retry = setTimeout(() => armAndPlay(v), 2000);
     v.addEventListener("playing", () => clearTimeout(retry), { once: true });
 
     armAndPlay(v);
-    if (!v.paused && !v.ended && v.readyState > 2) { setCovered(false); scheduleLabel(); }
+    if (!v.paused && !v.ended && v.readyState > 2) {
+      setOpacityA(1);
+      setCovered(false);
+      scheduleLabel();
+    }
 
     return clearLabelTimers;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
-  // ── Avanzar slide ───────────────────────────────────────────────
+  // ── Avanzar slide — crossfade sin negro ────────────────────────
   const goTo = useCallback((next: number) => {
     setCurrent(next);
     currentRef.current = next;
-    setCovered(true);
     setShowLabel(false);
     clearLabelTimers();
 
-    setTimeout(() => {
-      const v = videoRef.current;
-      if (!v) return;
-      v.pause();
-      v.src = slides[next].src;
+    // Determinar qué layer es el "siguiente" (el que no está activo)
+    const currentActive = activeLayerRef.current;
+    const nextLayer     = currentActive === "A" ? "B" : "A";
+    const nextRef       = nextLayer === "A" ? videoARef : videoBRef;
 
-      const reveal = () => { setCovered(false); scheduleLabel(); };
-      v.addEventListener("playing", reveal, { once: true });
+    const v = nextRef.current;
+    if (!v) return;
 
-      const retry = setTimeout(() => armAndPlay(v), 2000);
-      v.addEventListener("playing", () => clearTimeout(retry), { once: true });
+    // Cargar nuevo video en el layer inactivo (aún invisible)
+    v.src = slides[next].src;
+    if (nextLayer === "A") setObjectPosA(getObjectPos(slides[next].src));
+    else                   setObjectPosB(getObjectPos(slides[next].src));
 
-      armAndPlay(v);
-    }, 160);
+    const startCrossfade = () => {
+      // Ambas opacidades cambian en el mismo render → CSS anima simultáneamente
+      if (nextLayer === "A") {
+        setOpacityA(1);
+        setOpacityB(0);
+      } else {
+        setOpacityB(1);
+        setOpacityA(0);
+      }
+      setActiveLayer(nextLayer);
+      activeLayerRef.current = nextLayer;
+      scheduleLabel();
+    };
+
+    v.addEventListener("playing", startCrossfade, { once: true });
+
+    // Reintento Safari
+    const retry = setTimeout(() => armAndPlay(v), 2000);
+    v.addEventListener("playing", () => clearTimeout(retry), { once: true });
+
+    armAndPlay(v);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -114,6 +155,20 @@ export default function HeroSlider() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [mounted, goTo]);
 
+  const videoStyle = (opacity: number, objectPosition: string): React.CSSProperties => ({
+    position:      "absolute",
+    inset:         0,
+    width:         "100%",
+    height:        "100%",
+    objectFit:     "cover",
+    objectPosition,
+    display:       "block",
+    pointerEvents: "none",
+    zIndex:        1,
+    opacity,
+    transition:    `opacity ${CROSSFADE_MS}ms ease`,
+  });
+
   return (
     <>
       {/* Fondo negro base */}
@@ -123,7 +178,7 @@ export default function HeroSlider() {
         aria-hidden="true"
       />
 
-      {/* CSS específico para suprimir UI nativa WebKit en este video */}
+      {/* CSS para suprimir UI nativa WebKit */}
       <style>{`
         video[data-hero-video="true"] {
           background: #0c0c0c;
@@ -141,34 +196,35 @@ export default function HeroSlider() {
         }
       `}</style>
 
-      {/* Video único — solo cliente */}
+      {/* Layer A */}
       {mounted && (
         <video
-          ref={videoRef}
-          src={slides[0].src}
+          ref={videoARef}
           autoPlay muted loop playsInline preload="auto"
           controls={false} disablePictureInPicture disableRemotePlayback
           controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
           poster=""
           data-hero-video="true"
           tabIndex={-1} aria-hidden="true"
-          style={{
-            position:      "absolute",
-            inset:         0,
-            width:         "100%",
-            height:        "100%",
-            objectFit:     "cover",
-            display:       "block",
-            pointerEvents: "none",
-            zIndex:        1,
-            opacity:       covered ? 0 : 1,
-            visibility:    covered ? "hidden" : "visible",
-          }}
+          style={videoStyle(opacityA, objectPosA)}
         />
       )}
 
-      {/* Cubierta negra: tapa el video hasta que "playing" confirme reproducción real.
-          Evita que Safari muestre el ícono nativo de play durante la carga. */}
+      {/* Layer B */}
+      {mounted && (
+        <video
+          ref={videoBRef}
+          autoPlay muted loop playsInline preload="auto"
+          controls={false} disablePictureInPicture disableRemotePlayback
+          controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+          poster=""
+          data-hero-video="true"
+          tabIndex={-1} aria-hidden="true"
+          style={videoStyle(opacityB, objectPosB)}
+        />
+      )}
+
+      {/* Cubierta negra — SOLO durante carga inicial, no entre slides */}
       <div
         aria-hidden="true"
         style={{
@@ -182,7 +238,7 @@ export default function HeroSlider() {
         }}
       />
 
-      {/* Gradiente inferior — legibilidad de caption, Foster-style */}
+      {/* Gradiente inferior */}
       <div
         aria-hidden="true"
         style={{
@@ -194,7 +250,7 @@ export default function HeroSlider() {
         }}
       />
 
-      {/* Label proyecto — misma estética que etiquetas editoriales inferiores */}
+      {/* Label proyecto */}
       <div
         className="absolute left-8 md:left-16"
         style={{ bottom: "3.25rem", zIndex: 4 }}
@@ -221,36 +277,10 @@ export default function HeroSlider() {
         </span>
       </div>
 
-      {/* Contador — bottom-right, Foster signature */}
-      <div
-        className="absolute right-8 md:right-16"
-        style={{ bottom: "3.25rem", zIndex: 4 }}
-      >
-        <span
-          style={{
-            display:       "block",
-            fontFamily:    "var(--font-geist), sans-serif",
-            fontSize:      "0.625rem",
-            letterSpacing: "0.2em",
-            color:         "rgba(255,255,255,0.28)",
-            fontWeight:    300,
-            opacity:       covered ? 0 : 1,
-            transition:    "opacity 800ms ease-out",
-            pointerEvents: "none",
-          }}
-        >
-          {String(current + 1).padStart(2, "0")} — {String(COUNT).padStart(2, "0")}
-        </span>
-      </div>
-
-      {/* Indicadores — líneas horizontales, bottom-center */}
+      {/* Indicadores */}
       <div
         className="absolute left-1/2 flex items-center gap-[6px]"
-        style={{
-          bottom:    "3rem",
-          transform: "translateX(-50%)",
-          zIndex:    4,
-        }}
+        style={{ bottom: "3rem", transform: "translateX(-50%)", zIndex: 4 }}
         aria-hidden="true"
       >
         {slides.map((_, i) => (
