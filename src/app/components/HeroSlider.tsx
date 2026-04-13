@@ -10,8 +10,9 @@ const slides = [
   { src: "/videos/video-hero011.mp4", label: "TEMOZÓN"        },
 ];
 
-const N       = slides.length;
-const FADE_MS = 700;
+const N        = slides.length;
+const SLIDE_MS = 8000;   // duración visible exacta de cada video
+const FADE_MS  = 350;    // transición rápida y limpia
 
 function getObjectPos(src: string) {
   return src === "/videos/video-hero04.mp4" ? "55% center" : "50% center";
@@ -22,7 +23,7 @@ function arm(v: HTMLVideoElement) {
   v.muted            = true;
   v.defaultMuted     = true;
   v.playsInline      = true;
-  v.loop             = false;   // sin loop — usamos `ended`
+  v.loop             = false;
   v.controls         = false;
   v.autoplay         = true;
   v.removeAttribute("controls");
@@ -35,25 +36,16 @@ function arm(v: HTMLVideoElement) {
   v.setAttribute("data-hero-video",       "true");
 }
 
-// ── Carga y reproduce un video; llama `onPlaying` cuando arranca ──
-function startVideo(
-  v: HTMLVideoElement,
-  src: string,
-  onPlaying: () => void,
-) {
-  arm(v);
-  v.src = src;
-
-  // `playing` = primer frame renderizado → crossfade seguro
-  const onP = () => { v.removeEventListener("playing", onP); onPlaying(); };
-  v.addEventListener("playing", onP);
-
-  // Retry Safari: si playing no disparó en 2 s, intentar de nuevo
-  const retry = setTimeout(() => v.play().catch(() => {}), 2000);
-  v.addEventListener("playing", () => clearTimeout(retry), { once: true });
-
+// ── Precargar un video en un layer inactivo (sin reproducir) ──────
+function preload(v: HTMLVideoElement, src: string) {
+  v.pause();
+  v.muted        = true;
+  v.defaultMuted = true;
+  v.autoplay     = false;
+  v.removeAttribute("autoplay");
+  v.preload      = "auto";
+  v.src          = src;
   v.load();
-  v.play().catch(() => {});
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -69,9 +61,10 @@ export default function HeroSlider() {
 
   const vA       = useRef<HTMLVideoElement | null>(null);
   const vB       = useRef<HTMLVideoElement | null>(null);
-  const idxRef   = useRef(0);          // slide actualmente activo
+  const idxRef   = useRef(0);
   const layerRef = useRef<"A" | "B">("A");
-  const busyRef  = useRef(false);      // protección contra doble-avance
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const busyRef  = useRef(false);
   const lblTmrs  = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearLbls = () => {
@@ -83,16 +76,16 @@ export default function HeroSlider() {
     clearLbls();
     setShowLabel(false);
     lblTmrs.current = [
-      setTimeout(() => setShowLabel(true),  1600),
-      setTimeout(() => setShowLabel(false), 6400),
+      setTimeout(() => setShowLabel(true),  600),
+      setTimeout(() => setShowLabel(false), 7200),
     ];
   };
 
   useEffect(() => { setMounted(true); }, []);
 
   // ── Avanzar al siguiente slide ──────────────────────────────────
-  // Se llama desde el evento `ended` del video activo.
-  // Usa `busyRef` para que nunca se dispare dos veces en paralelo.
+  // Controlado por setTimeout (8 s exactos) — no por `ended`.
+  // El siguiente video ya está preloaded: solo arm + play, sin load().
   const advanceRef = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -100,9 +93,9 @@ export default function HeroSlider() {
       if (busyRef.current) return;
       busyRef.current = true;
 
-      const nextIdx   = (idxRef.current + 1) % N;
       const curLayer  = layerRef.current;
       const nextLayer = curLayer === "A" ? "B" : "A";
+      const nextIdx   = (idxRef.current + 1) % N;
       const nextV     = (nextLayer === "A" ? vA : vB).current;
       const curV      = (curLayer  === "A" ? vA : vB).current;
 
@@ -116,55 +109,68 @@ export default function HeroSlider() {
       setShowLabel(false);
       clearLbls();
 
-      startVideo(nextV, slides[nextIdx].src, () => {
-        // El siguiente video está reproduciendo → crossfade simultáneo
+      // El video ya está preloaded — arm, rewind, play (sin re-load)
+      arm(nextV);
+      nextV.currentTime = 0;
+
+      let switched = false;
+      const doSwitch = () => {
+        if (switched) return;
+        switched = true;
+
+        // Crossfade inmediato
         if (nextLayer === "A") { setOpA(1); setOpB(0); }
         else                   { setOpB(1); setOpA(0); }
         layerRef.current = nextLayer;
         idxRef.current   = nextIdx;
-        fireLabel();
         busyRef.current  = false;
+        fireLabel();
 
-        // Precargar el slide posterior en el layer ahora saliente
-        // (usa toda la duración del clip actual para buffear el siguiente)
-        if (curV) {
-          const preIdx = (nextIdx + 1) % N;
-          arm(curV);
-          curV.autoplay = false;          // preload only — no autoplay
-          curV.removeAttribute("autoplay");
-          curV.src     = slides[preIdx].src;
-          curV.preload = "auto";
-          curV.load();
-        }
+        // Precargar el siguiente siguiente DESPUÉS del fade
+        // (evita flickering en el layer saliente durante la transición)
+        setTimeout(() => {
+          if (curV) {
+            const preIdx = (nextIdx + 1) % N;
+            preload(curV, slides[preIdx].src);
+          }
+        }, FADE_MS + 50);
 
-        // Escuchar `ended` en el nuevo video activo
-        // + `timeupdate` como fallback (algunos WebKit no disparan `ended` sin audio)
-        let done = false;
-        const go = () => {
-          if (done) return;
-          done = true;
-          nextV.removeEventListener("timeupdate", onTU);
-          advanceRef.current();
-        };
-        const onTU = () => {
-          if (nextV.duration && nextV.currentTime >= nextV.duration - 0.15) go();
-        };
-        nextV.addEventListener("ended",      go,   { once: true });
-        nextV.addEventListener("timeupdate", onTU);
-      });
+        // Timer exacto de 8 s para el próximo avance
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => advanceRef.current(), SLIDE_MS);
+      };
+
+      // Disparar switch cuando el video arranca (instantáneo si preloaded)
+      // Fallback de 250 ms por si `playing` no dispara (Safari edge case)
+      const fallback = setTimeout(doSwitch, 250);
+      nextV.addEventListener("playing", () => {
+        clearTimeout(fallback);
+        doSwitch();
+      }, { once: true });
+
+      nextV.play().catch(() => {});
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);   // se define una sola vez; accede a todo por refs
+  }, []);
 
   // ── Carga inicial: slide 0 en layer A ───────────────────────────
   useEffect(() => {
     if (!mounted || !vA.current || !vB.current) return;
-    const v  = vA.current;
+    const va = vA.current;
     const vb = vB.current;
 
+    arm(va);
     setObjPosA(getObjectPos(slides[0].src));
+    va.src     = slides[0].src;
+    va.preload = "auto";
+    va.load();
 
-    startVideo(v, slides[0].src, () => {
+    let started = false;
+    const onPlaying = () => {
+      if (started) return;
+      started = true;
+      va.removeEventListener("playing", onPlaying);
+
       idxRef.current   = 0;
       layerRef.current = "A";
       setOpA(1);
@@ -172,29 +178,27 @@ export default function HeroSlider() {
       fireLabel();
 
       // Precargar slide 1 en layer B
-      arm(vb);
-      vb.autoplay = false;
-      vb.removeAttribute("autoplay");
-      vb.src     = slides[1].src;
-      vb.preload = "auto";
-      vb.load();
+      preload(vb, slides[1].src);
 
-      // Arrancar la cadena cuando slide 0 termine
-      let done = false;
-      const go = () => {
-        if (done) return;
-        done = true;
-        v.removeEventListener("timeupdate", onTU);
-        advanceRef.current();
-      };
-      const onTU = () => {
-        if (v.duration && v.currentTime >= v.duration - 0.15) go();
-      };
-      v.addEventListener("ended",      go,   { once: true });
-      v.addEventListener("timeupdate", onTU);
-    });
+      // Timer exacto de 8 s
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => advanceRef.current(), SLIDE_MS);
+    };
 
-    return () => clearLbls();
+    // Retry Safari: si playing no dispara en 2 s, reintentar play
+    const retry = setTimeout(() => {
+      if (!started) va.play().catch(() => {});
+    }, 2000);
+
+    va.addEventListener("playing", onPlaying);
+    va.play().catch(() => {});
+
+    return () => {
+      clearLbls();
+      clearTimeout(retry);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      va.removeEventListener("playing", onPlaying);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 

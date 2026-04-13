@@ -10,7 +10,26 @@ const productos: {
   slug: string;
   imagenes: string[];
 }[] = [
-  // Contenido se agregará en siguiente iteración
+  {
+    nombre: "Mesa Olinalá",
+    slug: "mesa-olinalá",
+    imagenes: ["/images/hero-02.png", "/images/hero-04.png", "/images/render1.jpg"],
+  },
+  {
+    nombre: "Cómoda Tepoz",
+    slug: "comoda-tepoz",
+    imagenes: ["/images/hero-03.png", "/images/hero-07.png", "/images/hero-01.png"],
+  },
+  {
+    nombre: "Mesa de centro Sabana",
+    slug: "mesa-de-centro-sabana",
+    imagenes: ["/images/hero-06.png", "/images/hero.jpg", "/images/hero-04.png"],
+  },
+  {
+    nombre: "Banco Canal",
+    slug: "banco-canal",
+    imagenes: ["/images/zaguan-1105-01.jpg", "/images/hero-07.png", "/images/hero-03.png"],
+  },
 ];
 
 function ProductSlider({ imagenes, nombre }: { imagenes: string[]; nombre: string }) {
@@ -200,14 +219,13 @@ export default function ProductosPage() {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              objectPosition: "50% 65%",
-              filter: "grayscale(1) contrast(1.08) brightness(0.95)",
+              objectPosition: "50% center",
             }}
           >
             <source src="/videos/video-hero02.mp4" type="video/mp4" />
           </video>
 
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.42)" }} aria-hidden="true" />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.28)" }} aria-hidden="true" />
 
           <div
             style={{

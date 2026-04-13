@@ -5,18 +5,21 @@ import { useEffect, useRef, useState } from "react";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
 
-const bloques = [
+const pilares = [
   {
-    heading: "PROYECTAR",
-    desc: "Definimos dirección, proporción y material.",
+    n: "—",
+    title: "No separamos diseño de ejecución",
+    desc: "Cada proyecto pasa por una misma mano — desde el primer estudio de material hasta la última visita de obra. No hay modelo de traspaso.",
   },
   {
-    heading: "COMPONER",
-    desc: "Seleccionamos materiales, uniones y acabados en armonía con el espacio.",
+    n: "—",
+    title: "La piedra se selecciona en cantera",
+    desc: "La carpintería se prototipa antes de especificarse. La iluminación se decide junto con la arquitectura.",
   },
   {
-    heading: "EJECUTAR",
-    desc: "Llevamos la propuesta a fabricación e implementación de cada elemento con control de detalle.",
+    n: "—",
+    title: "Trabajamos con un número limitado de proyectos",
+    desc: "Porque es la única forma de hacer espacios que se sientan inevitables.",
   },
 ];
 
@@ -57,7 +60,7 @@ function RevealBlock({
   );
 }
 
-export default function ProcesoPage() {
+export default function ConocenosPage() {
   return (
     <>
       <SiteHeader mode="page" />
@@ -87,24 +90,12 @@ export default function ProcesoPage() {
             transition: color 0.3s ease;
           }
           .back-top-btn:hover { color: var(--texto-principal); }
-
-          .proceso-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 3rem;
-          }
-          @media (min-width: 768px) {
-            .proceso-grid {
-              grid-template-columns: repeat(3, 1fr);
-              gap: 0;
-            }
-          }
         `}</style>
 
         {/* ─── Hero con video ───────────────────────────────────────── */}
         <section
           style={{ position: "relative", height: "32vh", overflow: "hidden" }}
-          aria-label="Proceso CĀLIZA"
+          aria-label="Conócenos — CĀLIZA"
         >
           <video
             autoPlay muted loop playsInline
@@ -118,7 +109,7 @@ export default function ProcesoPage() {
               filter: "grayscale(1) contrast(1.08) brightness(0.95)",
             }}
           >
-            <source src="/videos/video-hero03.mp4" type="video/mp4" />
+            <source src="/videos/video-hero07.mp4" type="video/mp4" />
           </video>
 
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.42)" }} aria-hidden="true" />
@@ -144,13 +135,13 @@ export default function ProcesoPage() {
                 marginBottom: "0.5rem",
               }}
             >
-              Metodología
+              Estudio
             </p>
             <h1
               className="font-serif"
               style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 300, letterSpacing: "0.1em", color: "#fff", lineHeight: 1 }}
             >
-              PROCESO
+              CONÓCENOS
             </h1>
           </div>
         </section>
@@ -187,159 +178,102 @@ export default function ProcesoPage() {
           </div>
         </div>
 
-        {/* ─── Contenido principal ─────────────────────────────────── */}
+        {/* ─── Contenido del estudio ───────────────────────────────── */}
         <section
           className="px-8 md:px-16"
-          style={{ paddingTop: "1.5rem", paddingBottom: "0" }}
-          aria-label="Proceso de trabajo"
+          style={{ paddingTop: "2rem", paddingBottom: "0" }}
+          aria-label="El estudio"
         >
+          <div style={{ maxWidth: "720px", display: "flex", flexDirection: "column", gap: "5rem" }}>
 
-          {/* Título + subtítulo + intro */}
-          <RevealBlock offsetY="30px" delay={0}>
-            <div style={{ maxWidth: "720px", marginBottom: "5rem" }}>
-              <h2
+            {/* Manifiesto */}
+            <RevealBlock offsetY="30px" delay={0}>
+              <p
                 className="font-serif font-light"
                 style={{
-                  fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
-                  letterSpacing: "0.1em",
+                  fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
                   color: "var(--texto-principal)",
-                  lineHeight: 1,
-                  marginBottom: "1.5rem",
+                  lineHeight: 1.1,
+                  letterSpacing: "-0.01em",
                 }}
               >
-                DEL ESTUDIO A TU HOGAR
-              </h2>
-              <p
-                style={{
-                  fontFamily: "var(--font-geist), sans-serif",
-                  fontSize: "0.9375rem",
-                  letterSpacing: "0.06em",
-                  color: "var(--texto-tenue)",
-                  fontWeight: 300,
-                  marginBottom: "2rem",
-                }}
-              >
-                Del criterio a la ejecución.
+                No elegimos materiales
+                <br />
+                por cómo se ven.
+                <br />
+                Los elegimos por cómo envejecen.
               </p>
-              <p
-                className="font-light"
-                style={{
-                  fontSize: "0.9375rem",
-                  color: "var(--texto-secundario)",
-                  letterSpacing: "0.02em",
-                  lineHeight: 1.8,
-                  maxWidth: "520px",
-                }}
-              >
-                Cada proyecto se desarrolla a partir de una lectura precisa del espacio,
-                la materia y su forma de habitarse. Diseñamos, definimos y ejecutamos con continuidad.
-              </p>
-            </div>
-          </RevealBlock>
+            </RevealBlock>
 
-          {/* Divisor */}
-          <RevealBlock offsetY="20px" delay={100}>
-            <div style={{ height: "1px", background: "var(--linea)", marginBottom: "0" }} />
-          </RevealBlock>
-
-          {/* Tres bloques */}
-          <RevealBlock offsetY="30px" delay={180}>
-            <div className="proceso-grid">
-              {bloques.map((b, i) => (
-                <div
-                  key={b.heading}
-                  style={{
-                    padding: "3rem 0",
-                    paddingRight: i < 2 ? "3rem" : "0",
-                    borderRight: i < 2 ? "1px solid var(--linea)" : "none",
-                    paddingLeft: i > 0 ? "3rem" : "0",
-                  }}
-                >
-                  {/* Contenedor de imagen — altura fija uniforme */}
-                  <div
+            {/* Pilares */}
+            {pilares.map((p, i) => (
+              <RevealBlock key={i} offsetY="40px" delay={i * 80}>
+                <article>
+                  <div style={{ height: "1px", background: "var(--linea)", marginBottom: "1.75rem" }} />
+                  <h2
+                    className="font-serif font-light"
                     style={{
-                      width: "100%",
-                      height: "220px",
-                      overflow: "hidden",
-                      marginBottom: "1.75rem",
-                      background: "var(--superficie)",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <p
-                    style={{
-                      fontFamily: "var(--font-geist), sans-serif",
-                      fontSize: "0.75rem",
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
+                      fontSize: "clamp(1.25rem, 2vw, 1.75rem)",
                       color: "var(--texto-principal)",
-                      fontWeight: 300,
-                      marginBottom: "1.25rem",
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.15,
+                      marginBottom: "1rem",
                     }}
                   >
-                    {b.heading}
-                  </p>
+                    {p.title}
+                  </h2>
                   <p
                     className="font-light"
                     style={{
                       fontSize: "0.9375rem",
                       color: "var(--texto-secundario)",
                       letterSpacing: "0.02em",
-                      lineHeight: 1.75,
+                      lineHeight: 1.8,
+                      maxWidth: "480px",
                     }}
                   >
-                    {b.desc}
+                    {p.desc}
                   </p>
-                </div>
-              ))}
-            </div>
-          </RevealBlock>
+                </article>
+              </RevealBlock>
+            ))}
 
-          {/* Divisor */}
-          <div style={{ height: "1px", background: "var(--linea)" }} />
+            {/* Testimonio */}
+            <RevealBlock offsetY="30px" delay={0}>
+              <blockquote style={{ borderLeft: "1px solid var(--acento)", paddingLeft: "1.75rem" }}>
+                <p
+                  className="font-serif font-light italic"
+                  style={{
+                    fontSize: "clamp(1.125rem, 2vw, 1.5rem)",
+                    color: "var(--texto-principal)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  &ldquo;El espacio no se siente diseñado. Se siente descubierto —
+                  como si siempre hubiera estado esperando existir.&rdquo;
+                </p>
+                <footer style={{ marginTop: "1rem" }}>
+                  <cite
+                    className="not-italic font-light"
+                    style={{
+                      fontSize: "0.8125rem",
+                      color: "var(--texto-tenue)",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    — R. Fernández, cliente residencial
+                  </cite>
+                </footer>
+              </blockquote>
+            </RevealBlock>
 
-          {/* Cierre */}
-          <RevealBlock offsetY="20px" delay={0}>
-            <div
-              style={{
-                paddingTop: "5rem",
-                paddingBottom: "2rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
-              <p
-                className="font-serif font-light"
-                style={{
-                  fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
-                  letterSpacing: "0.12em",
-                  color: "var(--texto-principal)",
-                  lineHeight: 1,
-                }}
-              >
-                CĀLIZA
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-geist), sans-serif",
-                  fontSize: "0.875rem",
-                  color: "var(--texto-tenue)",
-                  letterSpacing: "0.04em",
-                  fontWeight: 300,
-                }}
-              >
-                Un estudio, de principio a fin.
-              </p>
-            </div>
-          </RevealBlock>
-
+          </div>
         </section>
 
         {/* ─── Cierre editorial — Back to top ───────────────────────── */}
         <div
           className="px-8 md:px-16"
-          style={{ paddingTop: "6rem", paddingBottom: "6rem", display: "flex", justifyContent: "flex-end" }}
+          style={{ paddingTop: "8rem", paddingBottom: "6rem", display: "flex", justifyContent: "flex-end" }}
         >
           <button
             className="back-top-btn"
