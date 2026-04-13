@@ -83,6 +83,9 @@ export default function HeroSlider() {
       setOpacityA(1);
       setCovered(false);
       scheduleLabel();
+      // Precargar slide 1 en layer B mientras slide 0 está activo
+      const b = videoBRef.current;
+      if (b) { b.loop = false; b.src = slides[1].src; b.preload = "auto"; b.load(); }
     };
     v.addEventListener("playing", reveal, { once: true });
 
@@ -111,15 +114,26 @@ export default function HeroSlider() {
     // Determinar qué layer es el "siguiente" (el que no está activo)
     const currentActive = activeLayerRef.current;
     const nextLayer     = currentActive === "A" ? "B" : "A";
+    const outgoingRef   = currentActive === "A" ? videoARef : videoBRef;
     const nextRef       = nextLayer === "A" ? videoARef : videoBRef;
+
+    // ── Detener loop del video saliente — evita flash del primer frame
+    const outgoing = outgoingRef.current;
+    if (outgoing) outgoing.loop = false;
 
     const v = nextRef.current;
     if (!v) return;
 
-    // Cargar nuevo video en el layer inactivo (aún invisible)
-    v.src = slides[next].src;
-    if (nextLayer === "A") setObjectPosA(getObjectPos(slides[next].src));
-    else                   setObjectPosB(getObjectPos(slides[next].src));
+    // ── Cargar entrante — reusar si ya está precargado con el src correcto
+    const targetSrc = slides[next].src;
+    if (nextLayer === "A") setObjectPosA(getObjectPos(targetSrc));
+    else                   setObjectPosB(getObjectPos(targetSrc));
+
+    if (!v.src.endsWith(targetSrc) || v.readyState < 3) {
+      v.src = targetSrc;
+    } else {
+      v.currentTime = 0; // precargado: solo volver al inicio
+    }
 
     const startCrossfade = () => {
       // Ambas opacidades cambian en el mismo render → CSS anima simultáneamente
@@ -133,6 +147,17 @@ export default function HeroSlider() {
       setActiveLayer(nextLayer);
       activeLayerRef.current = nextLayer;
       scheduleLabel();
+
+      // ── Precargar siguiente slide en el layer ahora inactivo
+      setTimeout(() => {
+        if (!outgoing) return;
+        outgoing.pause();
+        const preIdx = (next + 1) % COUNT;
+        outgoing.loop    = false;
+        outgoing.src     = slides[preIdx].src;
+        outgoing.preload = "auto";
+        outgoing.load();
+      }, CROSSFADE_MS + 100);
     };
 
     v.addEventListener("playing", startCrossfade, { once: true });
@@ -200,7 +225,7 @@ export default function HeroSlider() {
       {mounted && (
         <video
           ref={videoARef}
-          autoPlay muted loop playsInline preload="auto"
+          autoPlay muted playsInline preload="auto"
           controls={false} disablePictureInPicture disableRemotePlayback
           controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
           poster=""
@@ -214,7 +239,7 @@ export default function HeroSlider() {
       {mounted && (
         <video
           ref={videoBRef}
-          autoPlay muted loop playsInline preload="auto"
+          autoPlay muted playsInline preload="auto"
           controls={false} disablePictureInPicture disableRemotePlayback
           controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
           poster=""
