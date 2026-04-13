@@ -1,213 +1,222 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+// ── Slides ────────────────────────────────────────────────────────
 const slides = [
-  { src: "/videos/video-hero08.mp4",  label: "R. DARÍO" },
-  { src: "/videos/video-hero04.mp4",  label: "AVÁNDARO" },
+  { src: "/videos/video-hero08.mp4",  label: "R. DARÍO"       },
+  { src: "/videos/video-hero04.mp4",  label: "AVÁNDARO"       },
   { src: "/videos/video-hero012.mp4", label: "TELCHAC PUERTO" },
-  { src: "/videos/video-hero011.mp4", label: "TEMOZÓN" },
+  { src: "/videos/video-hero011.mp4", label: "TEMOZÓN"        },
 ];
 
-const COUNT        = slides.length;
-const INTERVAL_MS  = 8000;
-const CROSSFADE_MS = 900;
-const LABEL_IN_MS  = 1600;
-const LABEL_OUT_MS = 6400;
-
-function armAndPlay(video: HTMLVideoElement) {
-  video.muted            = true;
-  video.defaultMuted     = true;
-  video.playsInline      = true;
-  video.autoplay         = true;
-  video.loop             = true;
-  video.controls         = false;
-  video.removeAttribute("controls");
-  video.setAttribute("muted",                 "");
-  video.setAttribute("playsinline",           "");
-  video.setAttribute("autoplay",              "");
-  video.setAttribute("webkit-playsinline",    "true");
-  video.setAttribute("x-webkit-airplay",      "deny");
-  video.setAttribute("disableremoteplayback", "");
-  video.setAttribute("data-hero-video",       "true");
-  const p = video.play();
-  if (p !== undefined) p.catch(() => {});
-}
+const N       = slides.length;
+const FADE_MS = 700;
 
 function getObjectPos(src: string) {
-  if (src === "/videos/video-hero04.mp4") return "55% center";
-  return "50% center";
+  return src === "/videos/video-hero04.mp4" ? "55% center" : "50% center";
 }
 
+// ── Prepara un <video> para autoplay seguro en WebKit/Safari ──────
+function arm(v: HTMLVideoElement) {
+  v.muted            = true;
+  v.defaultMuted     = true;
+  v.playsInline      = true;
+  v.loop             = false;   // sin loop — usamos `ended`
+  v.controls         = false;
+  v.autoplay         = true;
+  v.removeAttribute("controls");
+  v.setAttribute("muted",                 "");
+  v.setAttribute("playsinline",           "");
+  v.setAttribute("autoplay",              "");
+  v.setAttribute("webkit-playsinline",    "true");
+  v.setAttribute("x-webkit-airplay",      "deny");
+  v.setAttribute("disableremoteplayback", "");
+  v.setAttribute("data-hero-video",       "true");
+}
+
+// ── Carga y reproduce un video; llama `onPlaying` cuando arranca ──
+function startVideo(
+  v: HTMLVideoElement,
+  src: string,
+  onPlaying: () => void,
+) {
+  arm(v);
+  v.src = src;
+
+  // `playing` = primer frame renderizado → crossfade seguro
+  const onP = () => { v.removeEventListener("playing", onP); onPlaying(); };
+  v.addEventListener("playing", onP);
+
+  // Retry Safari: si playing no disparó en 2 s, intentar de nuevo
+  const retry = setTimeout(() => v.play().catch(() => {}), 2000);
+  v.addEventListener("playing", () => clearTimeout(retry), { once: true });
+
+  v.load();
+  v.play().catch(() => {});
+}
+
+// ─────────────────────────────────────────────────────────────────
 export default function HeroSlider() {
-  const [mounted,     setMounted]     = useState(false);
-  const [current,     setCurrent]     = useState(0);
-  const [covered,     setCovered]     = useState(true);   // solo carga inicial
-  const [showLabel,   setShowLabel]   = useState(false);
-  const [opacityA,    setOpacityA]    = useState(0);
-  const [opacityB,    setOpacityB]    = useState(0);
-  const [activeLayer, setActiveLayer] = useState<"A" | "B">("A");
-  const [objectPosA,  setObjectPosA]  = useState(getObjectPos(slides[0].src));
-  const [objectPosB,  setObjectPosB]  = useState("50% center");
+  const [mounted,   setMounted]   = useState(false);
+  const [current,   setCurrent]   = useState(0);
+  const [opA,       setOpA]       = useState(0);
+  const [opB,       setOpB]       = useState(0);
+  const [objPosA,   setObjPosA]   = useState(getObjectPos(slides[0].src));
+  const [objPosB,   setObjPosB]   = useState("50% center");
+  const [covered,   setCovered]   = useState(true);
+  const [showLabel, setShowLabel] = useState(false);
 
-  const videoARef      = useRef<HTMLVideoElement | null>(null);
-  const videoBRef      = useRef<HTMLVideoElement | null>(null);
-  const intervalRef    = useRef<ReturnType<typeof setInterval> | null>(null);
-  const currentRef     = useRef(0);
-  const activeLayerRef = useRef<"A" | "B">("A");
-  const labelTimers    = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const vA       = useRef<HTMLVideoElement | null>(null);
+  const vB       = useRef<HTMLVideoElement | null>(null);
+  const idxRef   = useRef(0);          // slide actualmente activo
+  const layerRef = useRef<"A" | "B">("A");
+  const busyRef  = useRef(false);      // protección contra doble-avance
+  const lblTmrs  = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const clearLabelTimers = () => {
-    labelTimers.current.forEach(clearTimeout);
-    labelTimers.current = [];
+  const clearLbls = () => {
+    lblTmrs.current.forEach(clearTimeout);
+    lblTmrs.current = [];
   };
 
-  const scheduleLabel = () => {
-    clearLabelTimers();
+  const fireLabel = () => {
+    clearLbls();
     setShowLabel(false);
-    const t1 = setTimeout(() => setShowLabel(true),  LABEL_IN_MS);
-    const t2 = setTimeout(() => setShowLabel(false), LABEL_OUT_MS);
-    labelTimers.current = [t1, t2];
+    lblTmrs.current = [
+      setTimeout(() => setShowLabel(true),  1600),
+      setTimeout(() => setShowLabel(false), 6400),
+    ];
   };
 
-  // ── Solo en cliente ─────────────────────────────────────────────
   useEffect(() => { setMounted(true); }, []);
 
-  // ── Primer slide en Layer A ─────────────────────────────────────
+  // ── Avanzar al siguiente slide ──────────────────────────────────
+  // Se llama desde el evento `ended` del video activo.
+  // Usa `busyRef` para que nunca se dispare dos veces en paralelo.
+  const advanceRef = useRef<() => void>(() => {});
+
   useEffect(() => {
-    if (!mounted || !videoARef.current) return;
-    const v = videoARef.current;
-    v.src = slides[0].src;
+    advanceRef.current = () => {
+      if (busyRef.current) return;
+      busyRef.current = true;
 
-    const reveal = () => {
-      setOpacityA(1);
-      setCovered(false);
-      scheduleLabel();
-      // Precargar slide 1 en layer B mientras slide 0 está activo
-      const b = videoBRef.current;
-      if (b) { b.loop = false; b.src = slides[1].src; b.preload = "auto"; b.load(); }
+      const nextIdx   = (idxRef.current + 1) % N;
+      const curLayer  = layerRef.current;
+      const nextLayer = curLayer === "A" ? "B" : "A";
+      const nextV     = (nextLayer === "A" ? vA : vB).current;
+      const curV      = (curLayer  === "A" ? vA : vB).current;
+
+      if (!nextV) { busyRef.current = false; return; }
+
+      // objectPosition correcta antes de que el layer sea visible
+      if (nextLayer === "A") setObjPosA(getObjectPos(slides[nextIdx].src));
+      else                   setObjPosB(getObjectPos(slides[nextIdx].src));
+
+      setCurrent(nextIdx);
+      setShowLabel(false);
+      clearLbls();
+
+      startVideo(nextV, slides[nextIdx].src, () => {
+        // El siguiente video está reproduciendo → crossfade simultáneo
+        if (nextLayer === "A") { setOpA(1); setOpB(0); }
+        else                   { setOpB(1); setOpA(0); }
+        layerRef.current = nextLayer;
+        idxRef.current   = nextIdx;
+        fireLabel();
+        busyRef.current  = false;
+
+        // Precargar el slide posterior en el layer ahora saliente
+        // (usa toda la duración del clip actual para buffear el siguiente)
+        if (curV) {
+          const preIdx = (nextIdx + 1) % N;
+          arm(curV);
+          curV.autoplay = false;          // preload only — no autoplay
+          curV.removeAttribute("autoplay");
+          curV.src     = slides[preIdx].src;
+          curV.preload = "auto";
+          curV.load();
+        }
+
+        // Escuchar `ended` en el nuevo video activo
+        // + `timeupdate` como fallback (algunos WebKit no disparan `ended` sin audio)
+        let done = false;
+        const go = () => {
+          if (done) return;
+          done = true;
+          nextV.removeEventListener("timeupdate", onTU);
+          advanceRef.current();
+        };
+        const onTU = () => {
+          if (nextV.duration && nextV.currentTime >= nextV.duration - 0.15) go();
+        };
+        nextV.addEventListener("ended",      go,   { once: true });
+        nextV.addEventListener("timeupdate", onTU);
+      });
     };
-    v.addEventListener("playing", reveal, { once: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);   // se define una sola vez; accede a todo por refs
 
-    // Reintento Safari cold start
-    const retry = setTimeout(() => armAndPlay(v), 2000);
-    v.addEventListener("playing", () => clearTimeout(retry), { once: true });
+  // ── Carga inicial: slide 0 en layer A ───────────────────────────
+  useEffect(() => {
+    if (!mounted || !vA.current || !vB.current) return;
+    const v  = vA.current;
+    const vb = vB.current;
 
-    armAndPlay(v);
-    if (!v.paused && !v.ended && v.readyState > 2) {
-      setOpacityA(1);
+    setObjPosA(getObjectPos(slides[0].src));
+
+    startVideo(v, slides[0].src, () => {
+      idxRef.current   = 0;
+      layerRef.current = "A";
+      setOpA(1);
       setCovered(false);
-      scheduleLabel();
-    }
+      fireLabel();
 
-    return clearLabelTimers;
+      // Precargar slide 1 en layer B
+      arm(vb);
+      vb.autoplay = false;
+      vb.removeAttribute("autoplay");
+      vb.src     = slides[1].src;
+      vb.preload = "auto";
+      vb.load();
+
+      // Arrancar la cadena cuando slide 0 termine
+      let done = false;
+      const go = () => {
+        if (done) return;
+        done = true;
+        v.removeEventListener("timeupdate", onTU);
+        advanceRef.current();
+      };
+      const onTU = () => {
+        if (v.duration && v.currentTime >= v.duration - 0.15) go();
+      };
+      v.addEventListener("ended",      go,   { once: true });
+      v.addEventListener("timeupdate", onTU);
+    });
+
+    return () => clearLbls();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
-  // ── Avanzar slide — crossfade sin negro ────────────────────────
-  const goTo = useCallback((next: number) => {
-    setCurrent(next);
-    currentRef.current = next;
-    setShowLabel(false);
-    clearLabelTimers();
-
-    // Determinar qué layer es el "siguiente" (el que no está activo)
-    const currentActive = activeLayerRef.current;
-    const nextLayer     = currentActive === "A" ? "B" : "A";
-    const outgoingRef   = currentActive === "A" ? videoARef : videoBRef;
-    const nextRef       = nextLayer === "A" ? videoARef : videoBRef;
-
-    // ── Detener loop del video saliente — evita flash del primer frame
-    const outgoing = outgoingRef.current;
-    if (outgoing) outgoing.loop = false;
-
-    const v = nextRef.current;
-    if (!v) return;
-
-    // ── Cargar entrante — reusar si ya está precargado con el src correcto
-    const targetSrc = slides[next].src;
-    if (nextLayer === "A") setObjectPosA(getObjectPos(targetSrc));
-    else                   setObjectPosB(getObjectPos(targetSrc));
-
-    if (!v.src.endsWith(targetSrc) || v.readyState < 3) {
-      v.src = targetSrc;
-    } else {
-      v.currentTime = 0; // precargado: solo volver al inicio
-    }
-
-    const startCrossfade = () => {
-      // Ambas opacidades cambian en el mismo render → CSS anima simultáneamente
-      if (nextLayer === "A") {
-        setOpacityA(1);
-        setOpacityB(0);
-      } else {
-        setOpacityB(1);
-        setOpacityA(0);
-      }
-      setActiveLayer(nextLayer);
-      activeLayerRef.current = nextLayer;
-      scheduleLabel();
-
-      // ── Precargar siguiente slide en el layer ahora inactivo
-      setTimeout(() => {
-        if (!outgoing) return;
-        outgoing.pause();
-        const preIdx = (next + 1) % COUNT;
-        outgoing.loop    = false;
-        outgoing.src     = slides[preIdx].src;
-        outgoing.preload = "auto";
-        outgoing.load();
-      }, CROSSFADE_MS + 100);
-    };
-
-    v.addEventListener("playing", startCrossfade, { once: true });
-
-    // Reintento Safari
-    const retry = setTimeout(() => armAndPlay(v), 2000);
-    v.addEventListener("playing", () => clearTimeout(retry), { once: true });
-
-    armAndPlay(v);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Auto-avance ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mounted) return;
-    intervalRef.current = setInterval(
-      () => goTo((currentRef.current + 1) % COUNT),
-      INTERVAL_MS
-    );
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [mounted, goTo]);
-
-  const videoStyle = (opacity: number, objectPosition: string): React.CSSProperties => ({
-    position:      "absolute",
-    inset:         0,
-    width:         "100%",
-    height:        "100%",
-    objectFit:     "cover",
-    objectPosition,
-    display:       "block",
-    pointerEvents: "none",
-    zIndex:        1,
-    opacity,
-    transition:    `opacity ${CROSSFADE_MS}ms ease`,
+  const vStyle = (op: number, pos: string): React.CSSProperties => ({
+    position:       "absolute",
+    inset:          0,
+    width:          "100%",
+    height:         "100%",
+    objectFit:      "cover",
+    objectPosition: pos,
+    display:        "block",
+    pointerEvents:  "none",
+    zIndex:         1,
+    opacity:        op,
+    transition:     `opacity ${FADE_MS}ms ease`,
   });
 
   return (
     <>
-      {/* Fondo negro base */}
-      <div
-        className="absolute inset-0"
-        style={{ background: "#0c0c0c", zIndex: 0 }}
-        aria-hidden="true"
-      />
-
-      {/* CSS para suprimir UI nativa WebKit */}
+      {/* Suprimir UI WebKit */}
       <style>{`
-        video[data-hero-video="true"] {
-          background: #0c0c0c;
-        }
+        video[data-hero-video="true"] { background: #0c0c0c; }
         video[data-hero-video="true"]::-webkit-media-controls,
         video[data-hero-video="true"]::-webkit-media-controls-enclosure,
         video[data-hero-video="true"]::-webkit-media-controls-panel,
@@ -221,35 +230,34 @@ export default function HeroSlider() {
         }
       `}</style>
 
+      {/* Fondo base negro */}
+      <div className="absolute inset-0" style={{ background: "#0c0c0c", zIndex: 0 }} aria-hidden="true" />
+
       {/* Layer A */}
       {mounted && (
         <video
-          ref={videoARef}
-          autoPlay muted playsInline preload="auto"
+          ref={vA}
+          muted playsInline preload="auto"
           controls={false} disablePictureInPicture disableRemotePlayback
           controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
-          poster=""
-          data-hero-video="true"
-          tabIndex={-1} aria-hidden="true"
-          style={videoStyle(opacityA, objectPosA)}
+          poster="" data-hero-video="true" tabIndex={-1} aria-hidden="true"
+          style={vStyle(opA, objPosA)}
         />
       )}
 
       {/* Layer B */}
       {mounted && (
         <video
-          ref={videoBRef}
-          autoPlay muted playsInline preload="auto"
+          ref={vB}
+          muted playsInline preload="auto"
           controls={false} disablePictureInPicture disableRemotePlayback
           controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
-          poster=""
-          data-hero-video="true"
-          tabIndex={-1} aria-hidden="true"
-          style={videoStyle(opacityB, objectPosB)}
+          poster="" data-hero-video="true" tabIndex={-1} aria-hidden="true"
+          style={vStyle(opB, objPosB)}
         />
       )}
 
-      {/* Cubierta negra — SOLO durante carga inicial, no entre slides */}
+      {/* Cubierta negra — solo carga inicial */}
       <div
         aria-hidden="true"
         style={{
@@ -276,10 +284,7 @@ export default function HeroSlider() {
       />
 
       {/* Label proyecto */}
-      <div
-        className="absolute left-8 md:left-16"
-        style={{ bottom: "3.25rem", zIndex: 4 }}
-      >
+      <div className="absolute left-8 md:left-16" style={{ bottom: "3.25rem", zIndex: 4 }}>
         <span
           className="inline-block rounded-full backdrop-blur-sm font-light"
           style={{
@@ -292,10 +297,10 @@ export default function HeroSlider() {
             color:         "#fff",
             fontFamily:    "var(--font-geist), sans-serif",
             fontWeight:    300,
+            pointerEvents: "none",
             opacity:       showLabel ? 1 : 0,
             transform:     showLabel ? "translateY(0)" : "translateY(5px)",
             transition:    "opacity 600ms ease-out, transform 600ms ease-out",
-            pointerEvents: "none",
           }}
         >
           {slides[current]?.label ?? ""}
@@ -311,14 +316,6 @@ export default function HeroSlider() {
         {slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => {
-              if (intervalRef.current) clearInterval(intervalRef.current);
-              goTo(i);
-              intervalRef.current = setInterval(
-                () => goTo((currentRef.current + 1) % COUNT),
-                INTERVAL_MS
-              );
-            }}
             aria-label={`Slide ${i + 1}`}
             style={{
               display:    "block",
