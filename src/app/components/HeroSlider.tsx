@@ -1,173 +1,279 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-// ── Slides con imagen y nombre de proyecto ───────────────────────────
-const SLIDES_DATA = [
-  { image: "/images/hero.jpg",    label: "Isla Cambria" },
-  { image: "/images/hero-01.png", label: "Club de Golf Bosques" },
-  { image: "/images/hero-07.png", label: "Mesa Otoño" },
-  { image: "/images/hero-03.png", label: "Media Center Sámara" },
-  { image: "/images/hero-06.png", label: "Mesa Sabana" },
+const slides = [
+  { src: "/videos/video-hero08.mp4",  label: "R. DARÍO" },
+  { src: "/videos/video-hero04.mp4",  label: "AVÁNDARO" },
+  { src: "/videos/video-hero010.mp4", label: "TEMOZÓN" },
+  { src: "/videos/video-hero011.mp4", label: "TELCHAC PUERTO" },
 ];
 
-const IMAGES  = SLIDES_DATA.map((s) => s.image);
-const SLIDES  = [...IMAGES, IMAGES[0]]; // clon del primero al final
-const SLIDE_W = 100 / SLIDES.length;   // 16.666...%
+const COUNT         = slides.length;
+const INTERVAL_MS   = 8000;
+const LABEL_IN_MS   = 1600;
+const LABEL_OUT_MS  = 6400;
 
-const INTERVAL_MS   = 4000;
-const TRANSITION_MS = 1100;
-const EASING        = "cubic-bezier(0.77, 0, 0.18, 1)";
+function armAndPlay(video: HTMLVideoElement) {
+  video.muted            = true;
+  video.defaultMuted     = true;
+  video.playsInline      = true;
+  video.autoplay         = true;
+  video.loop             = true;
+  video.controls         = false;
+  video.removeAttribute("controls");
+  video.setAttribute("muted",                 "");
+  video.setAttribute("playsinline",           "");
+  video.setAttribute("autoplay",              "");
+  video.setAttribute("webkit-playsinline",    "true");
+  video.setAttribute("x-webkit-airplay",      "deny");
+  video.setAttribute("disableremoteplayback", "");
+  video.setAttribute("data-hero-video",       "true");
+  const p = video.play();
+  if (p !== undefined) p.catch(() => {});
+}
 
-// Timing del label dentro de cada ciclo de 4000ms:
-// t=0    → slide cambia, label se oculta
-// t=900  → label aparece
-// t=2600 → label desaparece
-// t=4000 → siguiente slide
-const LABEL_SHOW_MS = 900;
-const LABEL_HIDE_MS = 2600;
+export default function HeroSlider() {
+  const [mounted,   setMounted]   = useState(false);
+  const [current,   setCurrent]   = useState(0);
+  const [covered,   setCovered]   = useState(true);
+  const [showLabel, setShowLabel] = useState(false);
 
-export function HeroSlider() {
-  const trackRef  = useRef<HTMLDivElement>(null);
-  const indexRef  = useRef(0);
-  const [dot, setDot]           = useState(0);       // índice real activo
-  const [showLabel, setShowLabel] = useState(false);  // visibilidad del label
+  const videoRef    = useRef<HTMLVideoElement | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentRef  = useRef(0);
+  const labelTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Autoplay y loop
+  const clearLabelTimers = () => {
+    labelTimers.current.forEach(clearTimeout);
+    labelTimers.current = [];
+  };
+
+  const scheduleLabel = () => {
+    clearLabelTimers();
+    setShowLabel(false);
+    const t1 = setTimeout(() => setShowLabel(true),  LABEL_IN_MS);
+    const t2 = setTimeout(() => setShowLabel(false), LABEL_OUT_MS);
+    labelTimers.current = [t1, t2];
+  };
+
+  // ── Solo en cliente ─────────────────────────────────────────────
+  useEffect(() => { setMounted(true); }, []);
+
+  // ── Primer slide ────────────────────────────────────────────────
   useEffect(() => {
-    function moveTo(index: number, animate: boolean) {
-      const t = trackRef.current;
-      if (!t) return;
-      t.style.transition = animate
-        ? `transform ${TRANSITION_MS}ms ${EASING}`
-        : "none";
-      t.style.transform = `translateX(-${index * SLIDE_W}%)`;
-      indexRef.current  = index;
-      setDot(index % IMAGES.length);
-    }
+    if (!mounted || !videoRef.current) return;
+    const v = videoRef.current;
 
-    function advance() {
-      const next = indexRef.current + 1;
-      moveTo(next, true);
+    const reveal = () => { setCovered(false); scheduleLabel(); };
+    v.addEventListener("playing", reveal, { once: true });
 
-      if (next === SLIDES.length - 1) {
-        setTimeout(() => {
-          const t = trackRef.current;
-          if (!t) return;
-          t.style.transition = "none";
-          t.style.transform  = "translateX(0%)";
-          void t.getBoundingClientRect();
-          indexRef.current = 0;
-          setDot(0);
-        }, TRANSITION_MS + 20);
-      }
-    }
+    // Reintento para Safari/iPhone (cold start)
+    const retry = setTimeout(() => armAndPlay(v), 2000);
+    v.addEventListener("playing", () => clearTimeout(retry), { once: true });
 
-    const timer = setInterval(advance, INTERVAL_MS);
-    return () => clearInterval(timer);
+    armAndPlay(v);
+    if (!v.paused && !v.ended && v.readyState > 2) { setCovered(false); scheduleLabel(); }
+
+    return clearLabelTimers;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
+
+  // ── Avanzar slide ───────────────────────────────────────────────
+  const goTo = useCallback((next: number) => {
+    setCurrent(next);
+    currentRef.current = next;
+    setCovered(true);
+    setShowLabel(false);
+    clearLabelTimers();
+
+    setTimeout(() => {
+      const v = videoRef.current;
+      if (!v) return;
+      v.pause();
+      v.src = slides[next].src;
+
+      const reveal = () => { setCovered(false); scheduleLabel(); };
+      v.addEventListener("playing", reveal, { once: true });
+
+      const retry = setTimeout(() => armAndPlay(v), 2000);
+      v.addEventListener("playing", () => clearTimeout(retry), { once: true });
+
+      armAndPlay(v);
+    }, 160);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Ciclo del label: ocultar → aparecer a 900ms → ocultar a 2600ms
+  // ── Auto-avance ─────────────────────────────────────────────────
   useEffect(() => {
-    setShowLabel(false);
-
-    const showTimeout = setTimeout(() => setShowLabel(true),  LABEL_SHOW_MS);
-    const hideTimeout = setTimeout(() => setShowLabel(false), LABEL_HIDE_MS);
-
-    return () => {
-      clearTimeout(showTimeout);
-      clearTimeout(hideTimeout);
-    };
-  }, [dot]);
-
-  const currentLabel = SLIDES_DATA[dot]?.label ?? "";
+    if (!mounted) return;
+    intervalRef.current = setInterval(
+      () => goTo((currentRef.current + 1) % COUNT),
+      INTERVAL_MS
+    );
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [mounted, goTo]);
 
   return (
     <>
-      {/* ── Track ── */}
+      {/* Fondo negro base */}
       <div
-        className="absolute inset-0 overflow-hidden"
-        style={{ zIndex: 0 }}
+        className="absolute inset-0"
+        style={{ background: "#0c0c0c", zIndex: 0 }}
         aria-hidden="true"
-      >
-        <div
-          ref={trackRef}
-          className="flex h-full"
-          style={{ width: `${SLIDES.length * 100}%`, willChange: "transform" }}
-        >
-          {SLIDES.map((src, i) => (
-            <div
-              key={i}
-              className="relative h-full flex-shrink-0"
-              style={{ width: `${SLIDE_W}%` }}
-            >
-              <Image
-                src={src}
-                alt=""
-                fill
-                style={{ objectFit: "cover" }}
-                priority={i === 0}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      />
 
-      {/* ── Pestaña de proyecto ── */}
+      {/* CSS específico para suprimir UI nativa WebKit en este video */}
+      <style>{`
+        video[data-hero-video="true"] {
+          background: #0c0c0c;
+        }
+        video[data-hero-video="true"]::-webkit-media-controls,
+        video[data-hero-video="true"]::-webkit-media-controls-enclosure,
+        video[data-hero-video="true"]::-webkit-media-controls-panel,
+        video[data-hero-video="true"]::-webkit-media-controls-start-playback-button,
+        video[data-hero-video="true"]::-webkit-media-controls-play-button {
+          display: none !important;
+          -webkit-appearance: none !important;
+          appearance: none !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+      `}</style>
+
+      {/* Video único — solo cliente */}
+      {mounted && (
+        <video
+          ref={videoRef}
+          src={slides[0].src}
+          autoPlay muted loop playsInline preload="auto"
+          controls={false} disablePictureInPicture disableRemotePlayback
+          controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+          poster=""
+          data-hero-video="true"
+          tabIndex={-1} aria-hidden="true"
+          style={{
+            position:      "absolute",
+            inset:         0,
+            width:         "100%",
+            height:        "100%",
+            objectFit:     "cover",
+            display:       "block",
+            pointerEvents: "none",
+            zIndex:        1,
+            opacity:       covered ? 0 : 1,
+            visibility:    covered ? "hidden" : "visible",
+          }}
+        />
+      )}
+
+      {/* Cubierta negra: tapa el video hasta que "playing" confirme reproducción real.
+          Evita que Safari muestre el ícono nativo de play durante la carga. */}
       <div
-        className="absolute bottom-14 left-8 md:left-16"
-        style={{ zIndex: 3 }}
+        aria-hidden="true"
+        style={{
+          position:      "absolute",
+          inset:         0,
+          background:    "#0c0c0c",
+          zIndex:        2,
+          pointerEvents: "none",
+          opacity:       covered ? 1 : 0,
+          transition:    covered ? "none" : "opacity 1100ms ease",
+        }}
+      />
+
+      {/* Gradiente inferior — legibilidad de caption, Foster-style */}
+      <div
+        aria-hidden="true"
+        style={{
+          position:      "absolute",
+          inset:         0,
+          background:    "linear-gradient(to top, rgba(0,0,0,0.48) 0%, transparent 36%)",
+          zIndex:        3,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Label proyecto — misma estética que etiquetas editoriales inferiores */}
+      <div
+        className="absolute left-8 md:left-16"
+        style={{ bottom: "3.25rem", zIndex: 4 }}
       >
         <span
           className="inline-block rounded-full backdrop-blur-sm font-light"
           style={{
-            background: "rgba(110, 115, 102, 0.38)",
-            border: "1px solid rgba(255,255,255,0.20)",
-            padding: "0.6rem 1.5rem",
-            fontSize: "0.8rem",
-            letterSpacing: "0.1em",
+            background:    "rgba(110,115,102,0.38)",
+            border:        "1px solid rgba(255,255,255,0.20)",
+            padding:       "0.7rem 1.8rem",
+            fontSize:      "0.9rem",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "#fff",
-            fontFamily: "var(--font-geist), sans-serif",
-            opacity: showLabel ? 1 : 0,
-            transform: showLabel ? "translateY(0)" : "translateY(12px)",
-            pointerEvents: showLabel ? "auto" : "none",
-            transition: "opacity 500ms ease-out, transform 500ms ease-out",
+            color:         "#fff",
+            fontFamily:    "var(--font-geist), sans-serif",
+            fontWeight:    300,
+            opacity:       showLabel ? 1 : 0,
+            transform:     showLabel ? "translateY(0)" : "translateY(5px)",
+            transition:    "opacity 600ms ease-out, transform 600ms ease-out",
+            pointerEvents: "none",
           }}
         >
-          {currentLabel}
+          {slides[current]?.label ?? ""}
         </span>
       </div>
 
-      {/* ── Indicadores — líneas finas ── */}
+      {/* Contador — bottom-right, Foster signature */}
       <div
-        className="absolute bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-2"
-        style={{ zIndex: 3 }}
+        className="absolute right-8 md:right-16"
+        style={{ bottom: "3.25rem", zIndex: 4 }}
+      >
+        <span
+          style={{
+            display:       "block",
+            fontFamily:    "var(--font-geist), sans-serif",
+            fontSize:      "0.625rem",
+            letterSpacing: "0.2em",
+            color:         "rgba(255,255,255,0.28)",
+            fontWeight:    300,
+            opacity:       covered ? 0 : 1,
+            transition:    "opacity 800ms ease-out",
+            pointerEvents: "none",
+          }}
+        >
+          {String(current + 1).padStart(2, "0")} — {String(COUNT).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* Indicadores — líneas horizontales, bottom-center */}
+      <div
+        className="absolute left-1/2 flex items-center gap-[6px]"
+        style={{
+          bottom:    "3rem",
+          transform: "translateX(-50%)",
+          zIndex:    4,
+        }}
         aria-hidden="true"
       >
-        {IMAGES.map((_, i) => (
+        {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => {
-              const track = trackRef.current;
-              if (!track) return;
-              track.style.transition = `transform ${TRANSITION_MS}ms ${EASING}`;
-              track.style.transform  = `translateX(-${i * SLIDE_W}%)`;
-              indexRef.current = i;
-              setDot(i);
+              if (intervalRef.current) clearInterval(intervalRef.current);
+              goTo(i);
+              intervalRef.current = setInterval(
+                () => goTo((currentRef.current + 1) % COUNT),
+                INTERVAL_MS
+              );
             }}
-            aria-label={`Imagen ${i + 1}`}
+            aria-label={`Slide ${i + 1}`}
             style={{
-              display: "block",
-              height: "1px",
-              width: i === dot ? "28px" : "8px",
-              background:
-                i === dot ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.35)",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              transition: `width ${TRANSITION_MS}ms ${EASING}, background 400ms ease`,
+              display:    "block",
+              height:     "1px",
+              width:      i === current ? "24px" : "6px",
+              background: i === current ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.22)",
+              border:     "none",
+              padding:    0,
+              cursor:     "pointer",
+              transition: "width 700ms cubic-bezier(0.77,0,0.18,1), background 400ms ease",
             }}
           />
         ))}

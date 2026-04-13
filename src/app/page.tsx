@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "./components/SiteHeader";
 import { SiteFooter } from "./components/SiteFooter";
-import { HeroSlider } from "./components/HeroSlider";
+import HeroSlider from "./components/HeroSlider";
 import { EditorialLogoBlock } from "./components/EditorialLogoBlock";
 import { EditorialTextBlock } from "./components/EditorialTextBlock";
 
@@ -11,22 +11,20 @@ export default function Home() {
       <main>
         {/* ─── Hero ───────────────────────────────────────────────── */}
         <section
-          className="relative flex flex-col items-center justify-center min-h-[95vh]"
-          style={{ paddingBottom: "8vh" }}
-          aria-label="Marca"
+          className="relative flex flex-col items-center justify-center overflow-hidden"
+          style={{ height: "95vh" }}
+          aria-label="Hero"
         >
-          {/* Header embebido en hero — texto blanco sobre imagen */}
           <SiteHeader mode="hero" />
-
-          {/* Slider de renders */}
           <HeroSlider />
-          {/* Overlay negro sutil */}
           <div
             className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.30)", zIndex: 1 }}
+            style={{
+              background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 100%)",
+              zIndex: 1,
+            }}
             aria-hidden="true"
           />
-          {/* Marca centrada */}
           <div
             className="relative flex flex-col items-center -translate-y-[34vh]"
             style={{ zIndex: 2 }}
@@ -35,8 +33,8 @@ export default function Home() {
               className="font-serif"
               style={{
                 fontSize: "clamp(3rem, 8vw, 6rem)",
-                fontWeight: 400,
-                letterSpacing: "0.12em",
+                fontWeight: 300,
+                letterSpacing: "0.18em",
                 lineHeight: 1,
                 color: "#fff",
               }}
@@ -47,7 +45,7 @@ export default function Home() {
         </section>
 
         {/* ─── Introducción ───────────────────────────────────────── */}
-        <section className="pt-32 pb-28" aria-label="Introducción">
+        <section className="pt-14 pb-28" aria-label="Introducción">
           <div className="max-w-6xl px-8 md:px-16">
 
             {/* Grid único: texto+imágenes izquierda / logo+texto derecha */}
@@ -57,26 +55,64 @@ export default function Home() {
               <div className="w-full max-w-[760px]">
                 <EditorialTextBlock />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                  <div className="w-full">
+                  <div className="w-full relative overflow-hidden">
                     <img
-                      src="/images/render1.jpg"
-                      alt="Espacio CĀLIZA"
+                      src="/images/hero.jpg"
+                      alt="Isla Cambria — CĀLIZA"
                       className="block w-full aspect-[4/5] object-cover"
                     />
+                    <span
+                      className="inline-block rounded-full backdrop-blur-sm font-light"
+                      style={{
+                        position: "absolute",
+                        bottom: "0.875rem",
+                        left: "0.875rem",
+                        background: "rgba(110,115,102,0.38)",
+                        border: "1px solid rgba(255,255,255,0.20)",
+                        padding: "0.35rem 0.9rem",
+                        fontSize: "0.6rem",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "#fff",
+                        fontFamily: "var(--font-geist), sans-serif",
+                        fontWeight: 300,
+                      }}
+                    >
+                      ISLA CAMBRIA
+                    </span>
                   </div>
-                  <div className="w-full">
+                  <div className="w-full relative overflow-hidden">
                     <img
-                      src="/images/Baño.jpg"
-                      alt="Baño CĀLIZA"
+                      src="/images/hero-02.png"
+                      alt="Mesa Otoño — CĀLIZA"
                       className="block w-full aspect-[4/5] object-cover"
                     />
+                    <span
+                      className="inline-block rounded-full backdrop-blur-sm font-light"
+                      style={{
+                        position: "absolute",
+                        bottom: "0.875rem",
+                        left: "0.875rem",
+                        background: "rgba(110,115,102,0.38)",
+                        border: "1px solid rgba(255,255,255,0.20)",
+                        padding: "0.35rem 0.9rem",
+                        fontSize: "0.6rem",
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "#fff",
+                        fontFamily: "var(--font-geist), sans-serif",
+                        fontWeight: 300,
+                      }}
+                    >
+                      MESA OTOÑO
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Columna derecha: pestaña editorial + logo */}
               {/* -mr-8 md:-mr-16 rompe el padding del contenedor para llegar al borde derecho */}
-              <div className="relative overflow-hidden -mr-8 md:-mr-16">
+              <div className="relative overflow-hidden -mr-8 md:-mr-16" style={{ paddingTop: "2rem" }}>
 
                 <style>{`
                   @keyframes slideFromRight {
@@ -364,11 +400,15 @@ export default function Home() {
 
           {/* Bloque inferior: cierre sobrio */}
           <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 px-10 md:px-16 py-16 md:py-20 mt-px"
+            className="mt-px py-16 md:py-20"
             style={{
               background: "var(--texto-principal)",
               borderRadius: "0 0 6px 6px",
             }}
+          >
+          <div
+            className="grid grid-cols-1 md:grid-cols-4 gap-12 items-start"
+            style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 3.5rem" }}
           >
             {/* Col 1: marca */}
             <div>
@@ -435,7 +475,7 @@ export default function Home() {
             </div>
 
             {/* Col 3: navegación */}
-            <div>
+            <div style={{ paddingLeft: "1.5rem" }}>
               <p
                 className="font-light mb-4"
                 style={{
@@ -470,6 +510,41 @@ export default function Home() {
                 ))}
               </div>
             </div>
+
+            {/* Col 4: legal */}
+            <div>
+              <p
+                className="font-light mb-4"
+                style={{
+                  fontSize: "0.75rem",
+                  color: "rgba(255,255,255,0.35)",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Legal
+              </p>
+              <div className="flex flex-col gap-2">
+                {[
+                  { label: "Términos y condiciones", href: "/terminos" },
+                  { label: "Política de privacidad", href: "/privacidad" },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="font-light transition-opacity hover:opacity-60"
+                    style={{
+                      fontSize: "0.8125rem",
+                      color: "rgba(255,255,255,0.6)",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
           </div>
 
         </section>
