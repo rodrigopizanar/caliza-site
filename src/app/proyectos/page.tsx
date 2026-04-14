@@ -9,22 +9,22 @@ const proyectos = [
   {
     nombre: "Club de Golf Bosques",
     slug: "club-de-golf-bosques",
-    imagenes: ["/images/hero.jpg", "/images/club-bosques-01.jpg", "/images/hero-01.png"],
+    imagenes: ["/images/hero-01.png", "/images/bosques-01.png", "/images/hero-03.png"],
   },
   {
-    nombre: "Isla Cambria",
-    slug: "isla-cambria",
-    imagenes: ["/images/hero-01.png", "/images/render1.jpg", "/images/hero-03.png"],
+    nombre: "Zaguán 1105",
+    slug: "zaguan-1105",
+    imagenes: ["/images/zaguan-1105-01.jpg"],
   },
   {
-    nombre: "Media Center Sámara",
-    slug: "media-center-samara",
-    imagenes: ["/images/hero-03.png", "/images/Baño.jpg", "/images/hero-06.png"],
+    nombre: "Avándaro",
+    slug: "avandaro",
+    imagenes: ["/images/avandaro-01.png", "/images/avandaro-02.png"],
   },
   {
-    nombre: "Mesa Sabana",
-    slug: "mesa-sabana",
-    imagenes: ["/images/hero-06.png", "/images/zaguan-1105-01.jpg", "/images/hero.jpg"],
+    nombre: "Telchac Puerto",
+    slug: "telchac-puerto",
+    imagenes: ["/images/telchac-03.png", "/images/telchac-04.png"],
   },
 ];
 
@@ -197,6 +197,10 @@ export default function ProyectosPage() {
             transition: color 0.3s ease;
           }
           .back-top-btn:hover { color: var(--texto-principal); }
+
+          @media (max-width: 768px) {
+            .proyectos-grid { grid-template-columns: 1fr !important; }
+          }
         `}</style>
 
         {/* ─── Hero con video ───────────────────────────────────────── */}
@@ -294,7 +298,7 @@ export default function ProyectosPage() {
           style={{ paddingTop: "2rem", paddingBottom: "0" }}
           aria-label="Proyectos seleccionados"
         >
-          <div style={{ maxWidth: "720px", display: "flex", flexDirection: "column", gap: "6rem" }}>
+          <div className="proyectos-grid" style={{ maxWidth: "1200px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "4rem 3rem" }}>
             {proyectos.map((p) => (
               <article key={p.slug}>
                 <Link href={`/proyectos/${p.slug}`} style={{ display: "block", textDecoration: "none" }}>

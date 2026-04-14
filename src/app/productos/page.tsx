@@ -8,120 +8,25 @@ import { SiteFooter } from "../components/SiteFooter";
 const productos: {
   nombre: string;
   slug: string;
-  imagenes: string[];
+  imagen: string;
 }[] = [
-  {
-    nombre: "Mesa Olinalá",
-    slug: "mesa-olinalá",
-    imagenes: ["/images/hero-02.png", "/images/hero-04.png", "/images/render1.jpg"],
-  },
-  {
-    nombre: "Cómoda Tepoz",
-    slug: "comoda-tepoz",
-    imagenes: ["/images/hero-03.png", "/images/hero-07.png", "/images/hero-01.png"],
-  },
-  {
-    nombre: "Mesa de centro Sabana",
-    slug: "mesa-de-centro-sabana",
-    imagenes: ["/images/hero-06.png", "/images/hero.jpg", "/images/hero-04.png"],
-  },
-  {
-    nombre: "Banco Canal",
-    slug: "banco-canal",
-    imagenes: ["/images/zaguan-1105-01.jpg", "/images/hero-07.png", "/images/hero-03.png"],
-  },
+  { nombre: "Credenza Otoño",      slug: "credenza-otono",      imagen: "/images/Otoño-01.png"  },
+  { nombre: "Mesa Albura",         slug: "mesa-albura",         imagen: "/images/Albura.png"    },
+  { nombre: "Mesa Thalassa",       slug: "mesa-thalassa",       imagen: "/images/thalassa.png"  },
+  { nombre: "Portavasos Véspero",  slug: "portavasos-vespero",  imagen: "/images/véspero.png"   },
+  { nombre: "Mesa Sabana",         slug: "mesa-sabana",         imagen: "/images/Sabana-01..png"},
+  { nombre: "Isla Cambria",        slug: "isla-cambria",        imagen: "/images/hero.jpg"      },
+  { nombre: "Mesa Duna",           slug: "mesa-duna",           imagen: "/images/Duna.png"      },
+  { nombre: "Credenza Bosque",     slug: "credenza-bosque",     imagen: "/images/Bosque.png"    },
+  { nombre: "Mesa Agave",          slug: "mesa-agave",          imagen: "/images/Agave.png"     },
+  { nombre: "Charola Nido",        slug: "charola-nido",        imagen: "/images/Nido.png"      },
+  { nombre: "Mesa Hanami",         slug: "mesa-hanami",         imagen: "/images/Hanami.png"    },
+  { nombre: "Mesa Remanso",        slug: "mesa-remanso",        imagen: "/images/Remanso.png"   },
+  { nombre: "Mesa Ámbar",          slug: "mesa-ambar",          imagen: "/images/Ambar.png"     },
+  { nombre: "Mesa Duramen",        slug: "mesa-duramen",        imagen: "/images/Duramen.png"   },
+  { nombre: "Mesa Cauce",          slug: "mesa-cauce",          imagen: "/images/Cauce.png"     },
+  { nombre: "Apartado Corteza",    slug: "apartado-corteza",    imagen: "/images/Corteza.png"   },
 ];
-
-function ProductSlider({ imagenes, nombre }: { imagenes: string[]; nombre: string }) {
-  const [current, setCurrent] = useState(0);
-  const startX = useRef(0);
-  const isDragging = useRef(false);
-
-  const next = () => setCurrent((c) => (c + 1) % imagenes.length);
-  const prev = () => setCurrent((c) => (c - 1 + imagenes.length) % imagenes.length);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setCurrent((c) => (c + 1) % imagenes.length);
-    }, 4000);
-    return () => clearInterval(id);
-  }, [imagenes.length]);
-
-  return (
-    <div
-      style={{ position: "relative", aspectRatio: "3/2", overflow: "hidden", cursor: "grab" }}
-      onPointerDown={(e) => {
-        isDragging.current = true;
-        startX.current = e.clientX;
-        (e.currentTarget as HTMLElement).style.cursor = "grabbing";
-      }}
-      onPointerUp={(e) => {
-        if (!isDragging.current) return;
-        isDragging.current = false;
-        (e.currentTarget as HTMLElement).style.cursor = "grab";
-        const delta = startX.current - e.clientX;
-        if (Math.abs(delta) > 40) delta > 0 ? next() : prev();
-      }}
-      onPointerLeave={(e) => {
-        isDragging.current = false;
-        (e.currentTarget as HTMLElement).style.cursor = "grab";
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          height: "100%",
-          transform: `translateX(-${current * 100}%)`,
-          transition: "transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-          willChange: "transform",
-        }}
-      >
-        {imagenes.map((src, i) => (
-          <div key={i} style={{ minWidth: "100%", height: "100%" }}>
-            <img
-              src={src}
-              alt={`${nombre} — imagen ${i + 1}`}
-              draggable={false}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", userSelect: "none" }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {imagenes.length > 1 && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "1rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: "0.4rem",
-            alignItems: "center",
-          }}
-        >
-          {imagenes.map((_, i) => (
-            <button
-              key={i}
-              onClick={(e) => { e.preventDefault(); setCurrent(i); }}
-              aria-label={`Imagen ${i + 1}`}
-              style={{
-                width: i === current ? "1.25rem" : "0.3rem",
-                height: "0.3rem",
-                borderRadius: "9999px",
-                background: i === current ? "#fff" : "rgba(255,255,255,0.4)",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                transition: "all 0.35s ease",
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function RevealBlock({
   children,
@@ -177,15 +82,10 @@ export default function ProductosPage() {
           .tab-regresar:focus-visible { outline: none; box-shadow: 0 0 0 1.5px #6E7366; }
 
           .titulo-producto {
-            display: inline;
-            background-image: linear-gradient(currentColor, currentColor);
-            background-repeat: no-repeat;
-            background-size: 0% 1px;
-            background-position: 0 100%;
-            padding-bottom: 2px;
-            transition: background-size 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: block;
+            text-decoration: none;
+            background: none;
           }
-          a:hover .titulo-producto { background-size: 100% 1px; }
 
           .back-top-btn {
             background: none;
@@ -201,6 +101,10 @@ export default function ProductosPage() {
             transition: color 0.3s ease;
           }
           .back-top-btn:hover { color: var(--texto-principal); }
+
+          @media (max-width: 768px) {
+            .productos-grid { grid-template-columns: 1fr !important; }
+          }
         `}</style>
 
         {/* ─── Hero con video ───────────────────────────────────────── */}
@@ -219,13 +123,13 @@ export default function ProductosPage() {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              objectPosition: "50% center",
+              objectPosition: "50% 65%",
             }}
           >
-            <source src="/videos/video-hero02.mp4" type="video/mp4" />
+            <source src="/videos/video-hero014.mp4" type="video/mp4" />
           </video>
 
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.28)" }} aria-hidden="true" />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.42)" }} aria-hidden="true" />
 
           <div
             style={{
@@ -291,43 +195,45 @@ export default function ProductosPage() {
           </div>
         </div>
 
-        {/* ─── Productos en columna ─────────────────────────────────── */}
+        {/* ─── Productos en grid ────────────────────────────────────── */}
         <section
           className="px-8 md:px-16"
           style={{ paddingTop: "2rem", paddingBottom: "0" }}
           aria-label="Productos seleccionados"
         >
-          <div style={{ maxWidth: "720px", display: "flex", flexDirection: "column", gap: "6rem" }}>
+          <div
+            className="productos-grid"
+            style={{ maxWidth: "1200px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "4rem 3rem" }}
+          >
             {productos.map((p) => (
-              <article key={p.slug}>
-                <Link href={`/productos/${p.slug}`} style={{ display: "block", textDecoration: "none" }}>
+              <article key={p.slug} style={{ cursor: "default" }}>
 
                   <RevealBlock offsetY="40px">
-                    <div
-                      style={{ transition: "opacity 0.4s ease" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.87")}
-                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-                    >
-                      <ProductSlider imagenes={p.imagenes} nombre={p.nombre} />
+                    <div style={{ aspectRatio: "3/2", overflow: "hidden" }}>
+                      <img
+                        src={p.imagen}
+                        alt={p.nombre}
+                        draggable={false}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", userSelect: "none" }}
+                      />
                     </div>
                   </RevealBlock>
 
                   <RevealBlock offsetY="-18px" delay={180}>
                     <h2
-                      className="font-serif font-light titulo-producto"
+                      className="font-serif font-light"
                       style={{
-                        display: "block",
                         marginTop: "1.25rem",
                         fontSize: "clamp(1.125rem, 1.75vw, 1.5rem)",
                         color: "var(--texto-principal)",
                         letterSpacing: "-0.01em",
+                        textDecoration: "none",
                       }}
                     >
                       {p.nombre}
                     </h2>
                   </RevealBlock>
 
-                </Link>
               </article>
             ))}
           </div>
