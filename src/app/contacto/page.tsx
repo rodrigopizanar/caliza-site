@@ -9,7 +9,7 @@ const datos = [
   { label: "Correo", valor: "info@calizastudio.com.mx", href: "mailto:info@calizastudio.com.mx" },
   { label: "Teléfono", valor: "+52 5576681763", href: "tel:+525576681763" },
   { label: "Instagram", valor: "@calizastudio.mx", href: "https://instagram.com/calizastudio.mx" },
-  { label: "Oficinas", valor: "Mérida · Ciudad de México", href: null },
+  { label: "Ubicación", valor: "Mérida · Ciudad de México", href: null },
 ];
 
 function RevealBlock({
@@ -89,8 +89,9 @@ export default function ContactoPage() {
           style={{ position: "relative", height: "32vh", overflow: "hidden" }}
           aria-label="Contacto CĀLIZA"
         >
-          <video
-            autoPlay muted loop playsInline
+          <img
+            src="/images/patronverde-01.png"
+            alt="Contacto CĀLIZA"
             style={{
               position: "absolute",
               inset: 0,
@@ -98,13 +99,10 @@ export default function ContactoPage() {
               height: "100%",
               objectFit: "cover",
               objectPosition: "50% 65%",
-              filter: "grayscale(1) contrast(1.08) brightness(0.95)",
             }}
-          >
-            <source src="/videos/video-hero05.mp4" type="video/mp4" />
-          </video>
+          />
 
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.42)" }} aria-hidden="true" />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)" }} aria-hidden="true" />
 
           <div
             style={{

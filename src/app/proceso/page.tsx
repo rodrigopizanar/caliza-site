@@ -9,14 +9,17 @@ const bloques = [
   {
     heading: "PROYECTAR",
     desc: "Definimos dirección, proporción y material.",
+    imagen: "/images/proyectar-01.png",
   },
   {
     heading: "COMPONER",
     desc: "Seleccionamos materiales, uniones y acabados en armonía con el espacio.",
+    imagen: "/images/componer-01.png",
   },
   {
     heading: "EJECUTAR",
     desc: "Llevamos la propuesta a fabricación e implementación de cada elemento con control de detalle.",
+    imagen: "/images/proceso-02.png",
   },
 ];
 
@@ -118,7 +121,7 @@ export default function ProcesoPage() {
               filter: "grayscale(1) contrast(1.08) brightness(0.95)",
             }}
           >
-            <source src="/videos/video-hero03.mp4" type="video/mp4" />
+            <source src="/videos/video-hero016.mp4" type="video/mp4" />
           </video>
 
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.42)" }} aria-hidden="true" />
@@ -265,7 +268,13 @@ export default function ProcesoPage() {
                       background: "var(--superficie)",
                       flexShrink: 0,
                     }}
-                  />
+                  >
+                    <img
+                      src={b.imagen}
+                      alt={b.heading}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    />
+                  </div>
                   <p
                     style={{
                       fontFamily: "var(--font-geist), sans-serif",

@@ -32,18 +32,6 @@ export function SiteFooter() {
         >
           @calizastudio.mx
         </a>
-        <span className="font-light" style={{ fontSize: "0.75rem", color: "var(--texto-tenue)" }}>
-          Built with{" "}
-          <a
-            href="https://tododeia.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-opacity hover:opacity-60"
-            style={{ color: "var(--texto-tenue)" }}
-          >
-            Claude Web Builder by Tododeia
-          </a>
-        </span>
       </div>
 
       {/* Fila legal */}

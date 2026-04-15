@@ -26,6 +26,16 @@ const proyectos = [
     slug: "telchac-puerto",
     imagenes: ["/images/telchac-03.png", "/images/telchac-04.png"],
   },
+  {
+    nombre: "R. Darío",
+    slug: "r-dario",
+    imagenes: ["/images/rdario-sala.png", "/images/rdario-com.png", "/images/rdario-rec.png"],
+  },
+  {
+    nombre: "Temozón Norte",
+    slug: "temozon-norte",
+    imagenes: ["/images/temozon-ext.png", "/images/temozon-int.png"],
+  },
 ];
 
 function ProjectSlider({ imagenes, nombre }: { imagenes: string[]; nombre: string }) {

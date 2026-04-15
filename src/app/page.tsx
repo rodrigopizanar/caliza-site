@@ -138,7 +138,7 @@ export default function Home() {
                   {/* Botón alineado a la izquierda del bloque */}
                   <div style={{ alignSelf: "flex-start", paddingLeft: "0.25rem" }}>
                     <Link
-                      href="/conocenos"
+                      href="/proceso"
                       className="tab-conocenos inline-flex items-center justify-center rounded-full font-light transition-all duration-300 ease-out"
                       style={{
                         border: "1px solid rgba(110,115,102,0.55)",
@@ -491,7 +491,7 @@ export default function Home() {
                 {[
                   { label: "Inicio", href: "/" },
                   { label: "Proyectos", href: "/proyectos" },
-                  { label: "Productos", href: "/estudio" },
+                  { label: "Productos", href: "/productos" },
                   { label: "Proceso", href: "/proceso" },
                   { label: "Contacto", href: "/contacto" },
                 ].map((item) => (
