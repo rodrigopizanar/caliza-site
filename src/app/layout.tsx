@@ -48,7 +48,7 @@ export default function RootLayout({
 
         {/* ─── WhatsApp flotante (global) ─────────────────────────── */}
         <a
-          href="https://wa.me/525576681763?text=%C2%A1Hola!%20Me%20gustar%C3%ADa%20cotizar%20un%20proyecto/producto%20de%20dise%C3%B1o%20C%C4%80LIZA"
+          href="https://wa.me/529991207154?text=%C2%A1Hola!%20Me%20gustar%C3%ADa%20cotizar%20un%20proyecto/producto%20de%20dise%C3%B1o%20C%C4%80LIZA"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Contactar por WhatsApp"

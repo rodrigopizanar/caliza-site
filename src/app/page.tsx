@@ -461,7 +461,7 @@ export default function Home() {
                   info@calizastudio.com.mx
                 </a>
                 <a
-                  href="tel:+525576681763"
+                  href="tel:+529991207154"
                   className="font-light transition-opacity hover:opacity-60"
                   style={{
                     fontSize: "0.9375rem",
@@ -469,7 +469,7 @@ export default function Home() {
                     letterSpacing: "0.02em",
                   }}
                 >
-                  +52 5576681763
+                  +52 999 120 7154
                 </a>
               </div>
             </div>

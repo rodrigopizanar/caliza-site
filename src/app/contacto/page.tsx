@@ -7,7 +7,7 @@ import { SiteFooter } from "../components/SiteFooter";
 
 const datos = [
   { label: "Correo", valor: "info@calizastudio.com.mx", href: "mailto:info@calizastudio.com.mx" },
-  { label: "Teléfono", valor: "+52 5576681763", href: "tel:+525576681763" },
+  { label: "Teléfono", valor: "+52 999 120 7154", href: "tel:+529991207154" },
   { label: "Instagram", valor: "@calizastudio.mx", href: "https://instagram.com/calizastudio.mx" },
   { label: "Ubicación", valor: "Mérida · Ciudad de México", href: null },
 ];
